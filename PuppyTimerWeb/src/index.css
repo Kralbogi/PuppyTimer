@@ -1,0 +1,49 @@
+@import "tailwindcss";
+@import "./styles/frameAnimations.css";
+
+:root {
+  --color-primary: #f97316;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f9fafb;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  color: #111827;
+}
+
+input, textarea, select {
+  -webkit-user-select: auto;
+  user-select: auto;
+  font-size: 16px;
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* Rota bilgi badge (Leaflet Tooltip override) */
+.route-badge.leaflet-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  pointer-events: none;
+}
+.route-badge.leaflet-tooltip::before {
+  display: none !important;
+}
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+}
