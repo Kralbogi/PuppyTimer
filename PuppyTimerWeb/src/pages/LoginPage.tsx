@@ -6,10 +6,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, Loader2, LogIn } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { girisYap } from "../services/authService";
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation(["auth", "errors"]);
   const [email, setEmail] = useState("");
   const [sifre, setSifre] = useState("");
   const [yukleniyor, setYukleniyor] = useState(false);
@@ -32,19 +34,19 @@ export const LoginPage: React.FC = () => {
           case "auth/user-not-found":
           case "auth/wrong-password":
           case "auth/invalid-credential":
-            setHata("E-posta veya şifre hatalı");
+            setHata(t("errors:auth.invalidCredentials"));
             break;
           case "auth/invalid-email":
-            setHata("Geçersiz e-posta adresi");
+            setHata(t("errors:auth.invalidEmail"));
             break;
           case "auth/too-many-requests":
-            setHata("Çok fazla deneme. Lütfen daha sonra tekrar deneyin.");
+            setHata(t("errors:auth.tooManyRequests"));
             break;
           default:
-            setHata("Giriş yapılamadı. Lütfen tekrar deneyin.");
+            setHata(t("errors:auth.unknown"));
         }
       } else {
-        setHata("Bir hata oluştu");
+        setHata(t("errors:auth.unknown"));
       }
     } finally {
       setYukleniyor(false);
@@ -58,18 +60,18 @@ export const LoginPage: React.FC = () => {
         <div className="text-center mb-8">
           <div className="text-6xl mb-3">🐾</div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">PuppyTimer</h1>
-          <p className="text-gray-600">Köpeğinizin günlük bakım asistanı</p>
+          <p className="text-gray-600">{t("auth:login.title")}</p>
         </div>
 
         {/* Login Form */}
         <div className="bg-white rounded-2xl shadow-xl p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Giriş Yap</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-6">{t("auth:login.title")}</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                E-posta
+                {t("auth:login.email.label")}
               </label>
               <div className="relative">
                 <Mail
@@ -80,7 +82,7 @@ export const LoginPage: React.FC = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ornek@email.com"
+                  placeholder={t("auth:login.email.placeholder")}
                   disabled={yukleniyor}
                   className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
                 />
@@ -90,7 +92,7 @@ export const LoginPage: React.FC = () => {
             {/* Sifre */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Şifre
+                {t("auth:login.password.label")}
               </label>
               <div className="relative">
                 <Lock
@@ -101,7 +103,7 @@ export const LoginPage: React.FC = () => {
                   type="password"
                   value={sifre}
                   onChange={(e) => setSifre(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder={t("auth:login.password.placeholder")}
                   disabled={yukleniyor}
                   className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 outline-none transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
                 />
@@ -124,12 +126,12 @@ export const LoginPage: React.FC = () => {
               {yukleniyor ? (
                 <>
                   <Loader2 size={18} className="animate-spin" />
-                  Giriş yapılıyor...
+                  {t("auth:login.submit")}...
                 </>
               ) : (
                 <>
                   <LogIn size={18} />
-                  Giriş Yap
+                  {t("auth:login.submit")}
                 </>
               )}
             </button>
@@ -138,13 +140,13 @@ export const LoginPage: React.FC = () => {
           {/* Kayit ol linki */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Hesabınız yok mu?{" "}
+              {t("auth:login.noAccount")}{" "}
               <button
                 type="button"
                 onClick={() => navigate("/register")}
                 className="text-orange-500 font-semibold hover:text-orange-600 transition-colors"
               >
-                Kayıt Ol
+                {t("auth:login.register")}
               </button>
             </p>
           </div>

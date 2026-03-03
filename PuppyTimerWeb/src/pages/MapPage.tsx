@@ -36,6 +36,8 @@ import { KopekYorumPanel } from "../components/community/KopekYorumPanel";
 import { MesajPanel } from "../components/community/MesajPanel";
 import ToplulukChatWidget from "../components/community/ToplulukChatWidget";
 import GorevWidget from "../components/map/GorevWidget";
+import { kayipKopekleriDinle, kayipKopekBildir, kayipKopekKapat } from "../services/kayipKopekService";
+import type { KayipKopek } from "../types/models";
 import { Toast } from "../components/common/Toast";
 import { OnlineArkadasBildirim } from "../components/common/OnlineArkadasBildirim";
 import KonumumButon from "../components/common/KonumumButon";
@@ -283,6 +285,13 @@ export const MapPage: React.FC<MapPageProps> = ({ kopekId }) => {
   const [rotaBilgisi, setRotaBilgisi] = useState<RotaBilgisi | null>(null);
   const [secilenKonusma, setSecilenKonusma] = useState<{ konusmaId: string; karsiTarafAd: string } | null>(null);
 
+  // Kayıp köpek bildirimleri
+  const [kayipKopekler, setKayipKopekler] = useState<KayipKopek[]>([]);
+  const [secilenKayipKopek, setSecilenKayipKopek] = useState<KayipKopek | null>(null);
+  const [showKayipModal, setShowKayipModal] = useState(false);
+  const [kayipForm, setKayipForm] = useState({ kopekAd: "", irk: "", aciklama: "", iletisim: "" });
+  const [kayipGonderiyor, setKayipGonderiyor] = useState(false);
+
   // Yakındaki yerler (veteriner, petshop)
   const [yakinYerler, setYakinYerler] = useState<YakinYer[]>([]);
   const [yakinYerlerGorunur, setYakinYerlerGorunur] = useState(false);
@@ -378,6 +387,16 @@ export const MapPage: React.FC<MapPageProps> = ({ kopekId }) => {
     // Ref'i güncelle — useState değil, bu sayede sonsuz döngü olmaz
     oncekiOnlineDurumlarRef.current = new Map(arkadasVM.onlineDurumlar);
   }, [arkadasVM.onlineDurumlar, arkadasVM.arkadaslar, mapMode]);
+
+  // ---------------------------------------------------------------------------
+  // Kayıp köpek bildirimleri - topluluk modunda dinle
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (mapMode !== "topluluk") return;
+    const unsubscribe = kayipKopekleriDinle(setKayipKopekler);
+    return unsubscribe;
+  }, [mapMode]);
 
   // ---------------------------------------------------------------------------
   // Eski paylasimlarimi otomatik temizle (5dk'dan eski)
@@ -697,6 +716,28 @@ export const MapPage: React.FC<MapPageProps> = ({ kopekId }) => {
                       setAktifYolTarifi(null); // Önceki rotayı temizle
                     },
                   }}
+                />
+              );
+            })}
+
+          {/* Community mode: kayıp köpek kırmızı marker'ları */}
+          {isCommunity &&
+            kayipKopekler.map((kayip) => {
+              const kayipIcon = L.divIcon({
+                html: `<div style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;animation:pulse 1.5s infinite;">
+                  <div style="width:44px;height:44px;border-radius:50%;background:#ef4444;border:3px solid white;box-shadow:0 0 0 4px rgba(239,68,68,0.4);display:flex;align-items:center;justify-content:center;font-size:20px;">🚨</div>
+                </div>`,
+                className: "",
+                iconSize: [44, 44],
+                iconAnchor: [22, 44],
+              });
+              return (
+                <Marker
+                  key={`kayip-${kayip.id}`}
+                  position={[kayip.enlem, kayip.boylam]}
+                  icon={kayipIcon}
+                  zIndexOffset={2000}
+                  eventHandlers={{ click: () => setSecilenKayipKopek(kayip) }}
                 />
               );
             })}
@@ -1162,6 +1203,17 @@ export const MapPage: React.FC<MapPageProps> = ({ kopekId }) => {
           )
         )}
 
+        {/* FAB: Kayıp Bildir - topluluk modunda */}
+        {isCommunity && !secilenKopek && (
+          <button
+            type="button"
+            onClick={() => setShowKayipModal(true)}
+            className="absolute bottom-20 right-4 z-[1000] flex items-center gap-2 px-3 py-2.5 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-full shadow-lg transition-colors text-sm"
+          >
+            🚨 Kayıp Bildir
+          </button>
+        )}
+
         {/* Topluluk Chat Widget */}
         {isCommunity && <ToplulukChatWidget />}
 
@@ -1452,6 +1504,166 @@ export const MapPage: React.FC<MapPageProps> = ({ kopekId }) => {
           onSave={saveZone}
           onClose={() => setShowZoneModal(false)}
         />
+      )}
+
+      {/* ================================================================== */}
+      {/* Kayıp Köpek Bilgi Paneli */}
+      {/* ================================================================== */}
+      {secilenKayipKopek && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-end" onClick={() => setSecilenKayipKopek(null)}>
+          <div className="bg-white rounded-t-3xl w-full p-6 pb-8" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-2xl">🚨</div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-red-700">Kayıp Köpek İlanı</h3>
+                <p className="text-xs text-gray-500">
+                  {new Date(secilenKayipKopek.olusturmaTarihi).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
+                </p>
+              </div>
+              <button type="button" onClick={() => setSecilenKayipKopek(null)} className="p-2 hover:bg-gray-100 rounded-full">
+                <X size={20} />
+              </button>
+            </div>
+
+            {secilenKayipKopek.thumbnailData && (
+              <img src={secilenKayipKopek.thumbnailData} alt={secilenKayipKopek.kopekAd} className="w-full h-40 object-cover rounded-2xl mb-4" />
+            )}
+
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-500">İsim</span>
+                <span className="text-sm font-semibold text-gray-900">{secilenKayipKopek.kopekAd}</span>
+              </div>
+              {secilenKayipKopek.irk && (
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Irk</span>
+                  <span className="text-sm font-semibold text-gray-900">{secilenKayipKopek.irk}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-500">Sahip</span>
+                <span className="text-sm font-semibold text-gray-900">{secilenKayipKopek.sahipAd}</span>
+              </div>
+            </div>
+
+            <div className="bg-red-50 rounded-xl p-3 mb-4">
+              <p className="text-sm text-red-700">{secilenKayipKopek.aciklama}</p>
+            </div>
+
+            <a
+              href={`tel:${secilenKayipKopek.iletisim}`}
+              className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-3 rounded-2xl font-semibold text-sm hover:bg-red-600"
+            >
+              📞 {secilenKayipKopek.iletisim}
+            </a>
+
+            {secilenKayipKopek.sahipId === topluluk.kullaniciId && (
+              <button
+                type="button"
+                onClick={async () => {
+                  await kayipKopekKapat(secilenKayipKopek.id);
+                  setSecilenKayipKopek(null);
+                }}
+                className="w-full mt-2 py-2.5 rounded-2xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50"
+              >
+                ✅ Bulundu / İlanı Kapat
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ================================================================== */}
+      {/* Kayıp Köpek Bildir Modalı */}
+      {/* ================================================================== */}
+      {showKayipModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-end">
+          <div className="bg-white rounded-t-3xl w-full p-6 pb-8 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-bold text-red-700">🚨 Kayıp Köpek Bildir</h3>
+              <button type="button" onClick={() => setShowKayipModal(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-5">
+              <p className="text-xs text-red-700">İlanınız topluluk haritasında 7 gün boyunca görünür olacak. Köpeğiniz bulunduğunda lütfen ilanı kapatın.</p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Köpeğin Adı *</label>
+                <input
+                  type="text"
+                  value={kayipForm.kopekAd}
+                  onChange={(e) => setKayipForm(f => ({ ...f, kopekAd: e.target.value }))}
+                  placeholder="Köpeğinizin adı"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-red-400"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Irk <span className="text-gray-400">(isteğe bağlı)</span></label>
+                <input
+                  type="text"
+                  value={kayipForm.irk}
+                  onChange={(e) => setKayipForm(f => ({ ...f, irk: e.target.value }))}
+                  placeholder="ör. Golden Retriever, Labrador..."
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-red-400"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama *</label>
+                <textarea
+                  value={kayipForm.aciklama}
+                  onChange={(e) => setKayipForm(f => ({ ...f, aciklama: e.target.value }))}
+                  placeholder="Renk, boyut, son görüldüğü yer, ayırt edici özellikler..."
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-red-400 resize-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">İletişim *</label>
+                <input
+                  type="text"
+                  value={kayipForm.iletisim}
+                  onChange={(e) => setKayipForm(f => ({ ...f, iletisim: e.target.value }))}
+                  placeholder="Telefon numaranız"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-red-400"
+                />
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={kayipGonderiyor || !kayipForm.kopekAd.trim() || !kayipForm.aciklama.trim() || !kayipForm.iletisim.trim()}
+              onClick={async () => {
+                setKayipGonderiyor(true);
+                try {
+                  const konum = await new Promise<GeolocationPosition>((res, rej) =>
+                    navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 })
+                  );
+                  await kayipKopekBildir({
+                    kopekAd: kayipForm.kopekAd,
+                    irk: kayipForm.irk || undefined,
+                    aciklama: kayipForm.aciklama,
+                    iletisim: kayipForm.iletisim,
+                    enlem: konum.coords.latitude,
+                    boylam: konum.coords.longitude,
+                  });
+                  setShowKayipModal(false);
+                  setKayipForm({ kopekAd: "", irk: "", aciklama: "", iletisim: "" });
+                } catch {
+                  alert("Konum alınamadı. Lütfen konum iznini açın.");
+                } finally {
+                  setKayipGonderiyor(false);
+                }
+              }}
+              className="w-full mt-5 bg-red-500 text-white py-3 rounded-2xl font-semibold text-sm hover:bg-red-600 disabled:opacity-50 transition-colors"
+            >
+              {kayipGonderiyor ? "Gönderiliyor..." : "🚨 Kayıp İlanı Oluştur"}
+            </button>
+          </div>
+        </div>
       )}
 
       {/* ================================================================== */}

@@ -3,7 +3,7 @@
 // Dog profile with avatar, info cards, summary stats, and inline edit mode
 // =============================================================================
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, lazy, Suspense } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
   Timer,
@@ -21,8 +21,11 @@ import {
   Heart,
   Scissors,
   Trophy,
+  QrCode,
+  Share2,
+  Bot,
 } from "lucide-react";
-import AnimatedDog3D from "../components/common/AnimatedDog3D";
+const AnimatedDog3D = lazy(() => import("../components/common/AnimatedDog3D"));
 import BreedSelector from "../components/common/BreedSelector";
 import PhotoPicker from "../components/common/PhotoPicker";
 import AccessorySelector from "../components/dog/AccessorySelector";
@@ -38,6 +41,9 @@ import { kopekFirestoreKaydet } from "../services/kopekSenkronizasyon";
 import Balloons from "../components/common/Balloons";
 import { bugunDogumGunuMu } from "../services/dateUtils";
 import { premiumMi, renkDegisiklikHakkiKontrol, renkDegisiklikSayaciniArtir, isimDegisiklikHakkiKontrol, isimDegisiklikSayaciniArtir } from "../services/premiumService";
+import QRCodeModal from "../components/dog/QRCodeModal";
+import SocialShareCard from "../components/dog/SocialShareCard";
+import AIAssistantModal from "../components/ai/AIAssistantModal";
 
 // -----------------------------------------------------------------------------
 // Helper: Calculate age from birthdate timestamp
@@ -156,6 +162,15 @@ export const DogProfilePage: React.FC<DogProfilePageProps> = ({ kopekId }) => {
   const [isPremium, setIsPremium] = useState(false);
   const [kalanRenkHakki, setKalanRenkHakki] = useState(2);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+
+  // QR Code modal state
+  const [showQRModal, setShowQRModal] = useState(false);
+
+  // Social share modal state
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  // AI Assistant modal state
+  const [showAIModal, setShowAIModal] = useState(false);
 
   // ---------------------------------------------------------------------------
   // Live queries
@@ -475,15 +490,17 @@ export const DogProfilePage: React.FC<DogProfilePageProps> = ({ kopekId }) => {
     <div className="px-4 py-6 space-y-6">
       {/* 3D Animated Dog + Name + Breed */}
       <div className="flex flex-col items-center gap-2">
-        <AnimatedDog3D
-          irk={kopek.irk}
-          size={160}
-          fotoData={kopek.fotoData}
-          showColorPicker={editMode}
-          customColors={editMode ? editRenkler : kopek.renkler}
-          onColorChange={editMode ? setEditRenkler : undefined}
-          aksesuarlar={editMode ? editAksesuarlar : kopek.aksesuarlar}
-        />
+        <Suspense fallback={<div className="w-40 h-40 rounded-full bg-gray-100 animate-pulse" />}>
+          <AnimatedDog3D
+            irk={kopek.irk}
+            size={160}
+            fotoData={kopek.fotoData}
+            showColorPicker={editMode}
+            customColors={editMode ? editRenkler : kopek.renkler}
+            onColorChange={editMode ? setEditRenkler : undefined}
+            aksesuarlar={editMode ? editAksesuarlar : kopek.aksesuarlar}
+          />
+        </Suspense>
         <p className="text-[10px] text-gray-300 -mt-2">Dokun veya dondur!</p>
 
         {/* Renk değiştirme hakkı göstergesi (sadece free users için) */}
@@ -566,31 +583,70 @@ export const DogProfilePage: React.FC<DogProfilePageProps> = ({ kopekId }) => {
           </>
         )}
 
-        {/* Edit / Done button */}
-        <button
-          type="button"
-          onClick={editMode ? saveEdit : startEdit}
-          disabled={saving}
-          className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-full border transition-colors disabled:opacity-50"
-          style={{
-            borderColor: editMode ? "#22c55e" : "#d1d5db",
-            color: editMode ? "#22c55e" : "#6b7280",
-          }}
-        >
-          {saving ? (
-            <span>Kaydediliyor...</span>
-          ) : editMode ? (
-            <>
-              <Check size={14} />
-              Bitti
-            </>
-          ) : (
-            <>
-              <Pencil size={14} />
-              Duzenle
-            </>
+        {/* Action buttons */}
+        <div className="flex items-center gap-2">
+          {/* AI Assistant button */}
+          {!editMode && (
+            <button
+              type="button"
+              onClick={() => setShowAIModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full border border-gray-200 text-gray-600 hover:border-purple-500 hover:text-purple-500 transition-colors"
+            >
+              <Bot size={14} />
+              <span>AI</span>
+            </button>
           )}
-        </button>
+
+          {/* Share button */}
+          {!editMode && (
+            <button
+              type="button"
+              onClick={() => setShowShareModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full border border-gray-200 text-gray-600 hover:border-pink-500 hover:text-pink-500 transition-colors"
+            >
+              <Share2 size={14} />
+              <span>Paylaş</span>
+            </button>
+          )}
+
+          {/* QR Code button */}
+          {!editMode && (
+            <button
+              type="button"
+              onClick={() => setShowQRModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full border border-gray-200 text-gray-600 hover:border-orange-500 hover:text-orange-500 transition-colors"
+            >
+              <QrCode size={14} />
+              <span>QR</span>
+            </button>
+          )}
+
+          {/* Edit / Done button */}
+          <button
+            type="button"
+            onClick={editMode ? saveEdit : startEdit}
+            disabled={saving}
+            className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-full border transition-colors disabled:opacity-50"
+            style={{
+              borderColor: editMode ? "#22c55e" : "#d1d5db",
+              color: editMode ? "#22c55e" : "#6b7280",
+            }}
+          >
+            {saving ? (
+              <span>Kaydediliyor...</span>
+            ) : editMode ? (
+              <>
+                <Check size={14} />
+                Bitti
+              </>
+            ) : (
+              <>
+                <Pencil size={14} />
+                Duzenle
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* 3-column info grid: Gender, Weight, Age */}
@@ -824,6 +880,25 @@ export const DogProfilePage: React.FC<DogProfilePageProps> = ({ kopekId }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* QR Code Modal */}
+      {showQRModal && kopek && (
+        <QRCodeModal kopek={kopek} onClose={() => setShowQRModal(false)} />
+      )}
+
+      {/* Social Share Modal */}
+      {showShareModal && kopek && (
+        <SocialShareCard kopek={kopek} onClose={() => setShowShareModal(false)} />
+      )}
+
+      {/* AI Assistant Modal */}
+      {showAIModal && kopek && (
+        <AIAssistantModal
+          dogName={kopek.ad}
+          dogBreed={kopek.irk}
+          onClose={() => setShowAIModal(false)}
+        />
       )}
     </div>
   );

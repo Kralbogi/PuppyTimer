@@ -26,7 +26,7 @@ const tabs: Tab[] = [
   },
 ];
 
-const BottomTabBar: React.FC = () => {
+const BottomTabBar: React.FC = React.memo(() => {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
@@ -69,6 +69,8 @@ const BottomTabBar: React.FC = () => {
       </div>
     </nav>
   );
-};
+});
+
+BottomTabBar.displayName = 'BottomTabBar';
 
 export default BottomTabBar;

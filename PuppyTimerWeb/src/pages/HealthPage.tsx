@@ -31,6 +31,7 @@ import EmptyState from "../components/layout/EmptyState";
 import { useSaglikViewModel } from "../hooks/useSaglikViewModel";
 import { useAsiTekrariViewModel } from "../hooks/useAsiTekrariViewModel";
 import AsiTimerCard from "../components/health/AsiTimerCard";
+import VeterinerSelector from "../components/health/VeterinerSelector";
 import { turkceTarihSaat, turkceTarih, goreceli } from "../services/dateUtils";
 import {
   SaglikKategorisi,
@@ -116,6 +117,7 @@ export const HealthPage: React.FC<HealthPageProps> = ({ kopekId }) => {
     tarih: "",
     sonrakiTarih: "",
     veterinerAdi: "",
+    veterinerId: undefined as number | undefined,
     not: "",
   });
 
@@ -186,7 +188,7 @@ export const HealthPage: React.FC<HealthPageProps> = ({ kopekId }) => {
   // ---------------------------------------------------------------------------
 
   const openAsiModal = () => {
-    setAsiForm({ asiAdi: "", tarih: "", sonrakiTarih: "", veterinerAdi: "", not: "" });
+    setAsiForm({ asiAdi: "", tarih: "", sonrakiTarih: "", veterinerAdi: "", veterinerId: undefined, not: "" });
     setShowAsiModal(true);
   };
 
@@ -1047,20 +1049,17 @@ export const HealthPage: React.FC<HealthPageProps> = ({ kopekId }) => {
                   className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-sm"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Veteriner Adi
-                </label>
-                <input
-                  type="text"
-                  value={asiForm.veterinerAdi}
-                  onChange={(e) =>
-                    setAsiForm((prev) => ({ ...prev, veterinerAdi: e.target.value }))
-                  }
-                  placeholder="Dr. ..."
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-sm"
-                />
-              </div>
+              <VeterinerSelector
+                selectedVeterinerId={asiForm.veterinerId}
+                selectedVeterinerAdi={asiForm.veterinerAdi}
+                onSelect={(veterinerId, veterinerAdi) => {
+                  setAsiForm((prev) => ({
+                    ...prev,
+                    veterinerId,
+                    veterinerAdi: veterinerAdi || "",
+                  }));
+                }}
+              />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Not

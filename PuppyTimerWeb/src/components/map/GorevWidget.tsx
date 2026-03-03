@@ -88,7 +88,7 @@ export default function GorevWidget({ kopekId }: GorevWidgetProps) {
       <button
         type="button"
         onClick={() => setAcik(true)}
-        className="fixed top-20 right-4 z-[999] flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold rounded-full shadow-lg hover:from-orange-600 hover:to-amber-600 transition-all"
+        className="fixed top-28 right-4 z-[999] flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-semibold rounded-full shadow-lg hover:from-orange-600 hover:to-amber-600 transition-all"
       >
         <Target size={18} />
         <span>Görevler</span>
@@ -103,7 +103,7 @@ export default function GorevWidget({ kopekId }: GorevWidgetProps) {
 
   // Expanded state
   return (
-    <div className="fixed top-20 right-4 z-[999] w-80 max-h-[500px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden">
+    <div className="fixed top-28 right-4 z-[999] w-80 max-h-[420px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-3 flex items-center justify-between text-white">
         <div className="flex items-center gap-2">

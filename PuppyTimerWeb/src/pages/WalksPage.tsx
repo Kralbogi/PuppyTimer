@@ -22,8 +22,10 @@ import {
   Calendar,
 } from "lucide-react";
 import PageHeader from "../components/layout/PageHeader";
+import { HavaDurumuWidget } from "../components/walks/HavaDurumuWidget";
 import { db } from "../db/database";
 import { turkceSaat, turkceTarih, bugunMu } from "../services/dateUtils";
+import { yuruyusBasariKontrol } from "../services/basariService";
 import type { YuruyusProgrami, YuruyusKaydi } from "../types/models";
 
 // -----------------------------------------------------------------------------
@@ -121,7 +123,10 @@ function useYuruyusViewModel(kopekId: number) {
       sure,
       tamamlandi: true,
     });
-  }, []);
+
+    // Başarı kontrolü
+    await yuruyusBasariKontrol(kopekId);
+  }, [kopekId]);
 
   // Kayit sil
   const kayitSil = useCallback(async (id: number) => {
@@ -408,6 +413,9 @@ export const WalksPage: React.FC<WalksPageProps> = ({ kopekId }) => {
     <div className="px-4 py-2 space-y-6">
       {/* Header */}
       <PageHeader title="Yuruyus" />
+
+      {/* Hava Durumu Widget */}
+      <HavaDurumuWidget />
 
       {/* Big Start/Stop Button */}
       <div className="flex flex-col items-center gap-4">

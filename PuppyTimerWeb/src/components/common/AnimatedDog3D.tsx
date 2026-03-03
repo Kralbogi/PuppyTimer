@@ -643,7 +643,7 @@ const AnimatedDog3D: React.FC<AnimatedDog3DProps> = ({
       `}</style>
 
       <Canvas
-        camera={{ position: [0, 1, 2.5], fov: 40 }}
+        camera={{ position: [0, 0.8, 3], fov: 45 }}
         dpr={[1, 2]}
         gl={{ antialias: true }}
       >

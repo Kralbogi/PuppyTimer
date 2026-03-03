@@ -26,7 +26,13 @@ import {
   UserX,
   Crown,
   Sparkles,
+  Globe,
+  Moon,
+  Sun,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { useLanguage, type Language } from "../contexts/LanguageContext";
+import { useTheme } from "../contexts/ThemeContext";
 import {
   kaydet,
   getir,
@@ -55,6 +61,9 @@ import { firestore } from "../services/firebase";
 
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation(["settings", "common"]);
+  const { language, setLanguage } = useLanguage();
+  const { toggleTheme, isDark } = useTheme();
 
   // -- API Key state
   const [apiKey, setApiKey] = useState("");
@@ -364,15 +373,96 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         {/* ================================================================ */}
-        {/* Claude API Section */}
+        {/* Language & Region Section */}
         {/* ================================================================ */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-              <Key size={20} className="text-purple-600" />
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+              <Globe size={20} className="text-blue-600" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900">Claude API</h2>
+              <h2 className="text-lg font-bold text-gray-900">
+                {t("settings:language.title")}
+              </h2>
+              <p className="text-xs text-gray-500">
+                {t("settings:language.description")}
+              </p>
+            </div>
+          </div>
+
+          <div className="px-5 py-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t("settings:language.label")}
+            </label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as Language)}
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-sm bg-white appearance-none"
+            >
+              <option value="tr">🇹🇷 Türkçe</option>
+              <option value="en">🇬🇧 English</option>
+              <option value="es">🇪🇸 Español</option>
+              <option value="de">🇩🇪 Deutsch</option>
+              <option value="fr">🇫🇷 Français</option>
+              <option value="pt">🇵🇹 Português</option>
+              <option value="ar">🇸🇦 العربية</option>
+            </select>
+            <p className="mt-2 text-xs text-gray-500">
+              {t("settings:language.changed")}
+            </p>
+          </div>
+        </div>
+
+        {/* ================================================================ */}
+        {/* Dark Mode Section */}
+        {/* ================================================================ */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+              {isDark ? (
+                <Moon size={20} className="text-indigo-600 dark:text-indigo-400" />
+              ) : (
+                <Sun size={20} className="text-indigo-600" />
+              )}
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                Tema
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Koyu veya açık tema seçin
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 bg-gray-200 dark:bg-indigo-600"
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                  isDark ? 'translate-x-7' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="px-5 py-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {isDark ? '🌙 Koyu tema aktif' : '☀️ Açık tema aktif'}
+            </p>
+          </div>
+        </div>
+
+        {/* ================================================================ */}
+        {/* Claude API Section */}
+        {/* ================================================================ */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+              <Key size={20} className="text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Claude API</h2>
               <p className="text-xs text-gray-500">
                 Yapay zeka analizi icin API anahtari
               </p>

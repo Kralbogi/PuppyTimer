@@ -162,7 +162,22 @@ export interface AsiKaydi {
   tarih: number;
   sonrakiTarih?: number;
   veterinerAdi?: string;
+  veterinerId?: number; // Reference to Veteriner
   not?: string;
+}
+
+// -----------------------------------------------------------------------------
+// Veteriner (Veteriner clinics/doctors)
+// -----------------------------------------------------------------------------
+export interface Veteriner {
+  id?: number;
+  ad: string;
+  klinikAdi?: string;
+  telefon?: string;
+  adres?: string;
+  eposta?: string;
+  not?: string;
+  olusturmaTarihi: number;
 }
 
 // -----------------------------------------------------------------------------
@@ -617,4 +632,168 @@ export interface KullaniciGorev {
   tamamlandi: boolean;
   tamamlanmaTarihi?: number;
   odul: number; // Points earned
+}
+
+// -----------------------------------------------------------------------------
+// 42. BakimKaydi (Grooming/Care Record)
+// -----------------------------------------------------------------------------
+export type BakimTuru = "banyo" | "tirnak" | "tras" | "dis";
+
+export interface BakimKaydi {
+  id?: number;
+  kopekId: number;
+  bakimTuru: BakimTuru;
+  tarih: number;
+  sonrakiTarih?: number; // Next scheduled date
+  not?: string;
+  maliyet?: number; // Cost (optional)
+  profesyonel: boolean; // Professional groomer vs home care
+}
+
+// -----------------------------------------------------------------------------
+// 43. EgitimKaydi (Training Record)
+// -----------------------------------------------------------------------------
+export type EgitimSeviye = "ogreniyor" | "ilerliyor" | "ustalasti";
+
+export interface EgitimKaydi {
+  id?: number;
+  kopekId: number;
+  komut: string; // Command name (e.g., "sit", "stay", "fetch")
+  seviye: EgitimSeviye;
+  tarih: number;
+  basariOrani?: number; // Success rate 0-100
+  not?: string;
+  sure?: number; // Training duration in minutes
+}
+
+// -----------------------------------------------------------------------------
+// 44. Basari (Achievement/Badge)
+// -----------------------------------------------------------------------------
+export type BasariTuru =
+  | "ilk_yuruyus"
+  | "yuruyus_5"
+  | "yuruyus_25"
+  | "yuruyus_100"
+  | "ilk_asi"
+  | "ilk_bakim"
+  | "bakim_10"
+  | "ilk_egitim"
+  | "komut_5"
+  | "komut_ustalasti"
+  | "arkadas_5"
+  | "arkadas_25"
+  | "puan_100"
+  | "puan_500"
+  | "puan_1000"
+  | "topluluk_aktif"
+  | "harita_kesen_10";
+
+export interface Basari {
+  id?: number;
+  kullaniciId: string;
+  kopekId: number;
+  basariTuru: BasariTuru;
+  baslik: string;
+  aciklama: string;
+  iconEmoji: string;
+  kazanilmaTarihi: number;
+  puan: number; // Points earned from this achievement
+}
+
+// -----------------------------------------------------------------------------
+// 45. Foto (Bağımsız fotoğraf galerisi)
+// -----------------------------------------------------------------------------
+export type FotoKategori = "galeri" | "oyun" | "dogumgunu" | "dis_yuruyus" | "diger";
+
+export interface Foto {
+  id?: number;
+  kopekId: number;
+  fotoData: string; // base64
+  tarih: number;
+  kategori: FotoKategori;
+  aciklama?: string;
+}
+
+// -----------------------------------------------------------------------------
+// 46. Gider (Harcama takibi)
+// -----------------------------------------------------------------------------
+export type GiderKategori =
+  | "veteriner"
+  | "mama"
+  | "bakim"
+  | "ilac"
+  | "oyuncak"
+  | "aksesuar"
+  | "sigorta"
+  | "egitim"
+  | "diger";
+
+export interface Gider {
+  id?: number;
+  kopekId: number;
+  tarih: number;
+  kategori: GiderKategori;
+  tutar: number;
+  baslik: string;
+  not?: string;
+  faturali?: boolean;
+}
+
+// -----------------------------------------------------------------------------
+// 47. Randevu (Veteriner / kuaför randevusu — IndexedDB)
+// -----------------------------------------------------------------------------
+export type RandevuTuru = "veteriner" | "kuafor" | "kontrol" | "diger";
+
+export interface Randevu {
+  id?: number;
+  kopekId: number;
+  tarih: number;       // Gün timestamp (gece yarısı)
+  saat: string;        // "HH:MM"
+  tur: RandevuTuru;
+  baslik: string;
+  not?: string;
+  veterinerId?: number;
+  tamamlandi: boolean;
+  olusturmaTarihi: number;
+}
+
+// -----------------------------------------------------------------------------
+// 48. KayipKopek (Kayıp köpek bildirimi — Firestore)
+// -----------------------------------------------------------------------------
+export interface KayipKopek {
+  id: string;
+  sahipId: string;
+  sahipAd: string;
+  kopekAd: string;
+  irk?: string;
+  aciklama: string;
+  iletisim: string;      // Telefon veya sosyal medya
+  thumbnailData?: string;
+  enlem: number;
+  boylam: number;
+  olusturmaTarihi: number;
+  aktif: boolean;
+}
+
+// -----------------------------------------------------------------------------
+// 49. Hatirlatici (In-app reminder — localStorage ile saklanır)
+// -----------------------------------------------------------------------------
+export type HatirlaticiTuru =
+  | "beslenme"
+  | "yuruyus"
+  | "ilac"
+  | "asi"
+  | "bakim"
+  | "veteriner"
+  | "diger";
+
+export interface Hatirlatici {
+  id: string; // UUID
+  kopekId: number;
+  baslik: string;
+  tur: HatirlaticiTuru;
+  saat: string; // "HH:MM"
+  gunler: number[]; // 0=Pzt … 6=Paz
+  aktif: boolean;
+  olusturmaTarihi: number;
 }

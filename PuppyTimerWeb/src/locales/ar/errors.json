@@ -1,0 +1,23 @@
+{
+  "auth": {
+    "invalidCredentials": "Invalid email or password",
+    "emailInUse": "This email is already in use",
+    "weakPassword": "Password is too weak. Must be at least 6 characters",
+    "invalidEmail": "Invalid email address",
+    "userNotFound": "User not found",
+    "wrongPassword": "Incorrect password",
+    "tooManyRequests": "Too many attempts. Please try again later",
+    "networkError": "Network error. Please check your internet connection",
+    "unknown": "An error occurred. Please try again",
+    "passwordMismatch": "Passwords don't match",
+    "nameRequired": "Name is required",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required"
+  },
+  "validation": {
+    "required": "This field is required",
+    "emailInvalid": "Invalid email format",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordMismatch": "Passwords don't match"
+  }
+}

@@ -27,6 +27,13 @@ import type {
   KullaniciKopekYorum,
   KullaniciArkadas,
   KullaniciGorev,
+  Veteriner,
+  BakimKaydi,
+  EgitimKaydi,
+  Basari,
+  Foto,
+  Gider,
+  Randevu,
 } from "../types/models";
 
 // -----------------------------------------------------------------------------
@@ -55,6 +62,13 @@ class PuppyTimerDB extends Dexie {
   kullaniciKopekYorumlari!: Table<KullaniciKopekYorum, number>;
   kullaniciArkadaslar!: Table<KullaniciArkadas, number>;
   kullaniciGorevler!: Table<KullaniciGorev, number>;
+  veterinerler!: Table<Veteriner, number>;
+  bakimKayitlari!: Table<BakimKaydi, number>;
+  egitimKayitlari!: Table<EgitimKaydi, number>;
+  basarilar!: Table<Basari, number>;
+  fotolar!: Table<Foto, number>;
+  giderler!: Table<Gider, number>;
+  randevular!: Table<Randevu, number>;
 
   constructor() {
     super("PuppyTimerDB");
@@ -111,6 +125,29 @@ class PuppyTimerDB extends Dexie {
     this.version(8).stores({
       kullaniciGorevler: "++id, kullaniciId, kopekId, gorevId, tamamlandi, bitisTarihi",
     });
+
+    // Version 9: Veteriner listesi
+    this.version(9).stores({
+      veterinerler: "++id, ad, klinikAdi, olusturmaTarihi",
+    });
+
+    // Version 10: Bakim, Egitim ve Basari sistemleri
+    this.version(10).stores({
+      bakimKayitlari: "++id, kopekId, tarih, bakimTuru, sonrakiTarih",
+      egitimKayitlari: "++id, kopekId, komut, seviye, tarih",
+      basarilar: "++id, kullaniciId, kopekId, basariTuru, kazanilmaTarihi",
+    });
+
+    // Version 11: Foto galerisi ve gider takibi
+    this.version(11).stores({
+      fotolar: "++id, kopekId, tarih, kategori",
+      giderler: "++id, kopekId, tarih, kategori",
+    });
+
+    // Version 12: Randevu takvimi
+    this.version(12).stores({
+      randevular: "++id, kopekId, tarih, tur, tamamlandi",
+    });
   }
 }
 
@@ -142,6 +179,12 @@ export async function cascadeDeleteKopek(kopekId: number): Promise<void> {
       db.takvimFotolari,
       db.asiTekrarlari,
       db.kiloKayitlari,
+      db.bakimKayitlari,
+      db.egitimKayitlari,
+      db.basarilar,
+      db.fotolar,
+      db.giderler,
+      db.randevular,
       db.kopekler,
     ],
     async () => {
@@ -161,6 +204,12 @@ export async function cascadeDeleteKopek(kopekId: number): Promise<void> {
       await db.takvimFotolari.where("kopekId").equals(kopekId).delete();
       await db.asiTekrarlari.where("kopekId").equals(kopekId).delete();
       await db.kiloKayitlari.where("kopekId").equals(kopekId).delete();
+      await db.bakimKayitlari.where("kopekId").equals(kopekId).delete();
+      await db.egitimKayitlari.where("kopekId").equals(kopekId).delete();
+      await db.basarilar.where("kopekId").equals(kopekId).delete();
+      await db.fotolar.where("kopekId").equals(kopekId).delete();
+      await db.giderler.where("kopekId").equals(kopekId).delete();
+      await db.randevular.where("kopekId").equals(kopekId).delete();
 
       // En son kopegi sil
       await db.kopekler.delete(kopekId);

@@ -7,13 +7,28 @@ import { useState } from "react";
 import { X, CreditCard, MapPin, CheckCircle, AlertCircle } from "lucide-react";
 import { useSepet } from "../../contexts/SepetContext";
 import { siparisOlustur } from "../../services/urunService";
+import { db } from "../../db/database";
+import type { GiderKategori } from "../../types/models";
 
 interface OdemeModalProps {
   acik: boolean;
   onKapat: () => void;
+  kopekId?: number;
 }
 
-export default function OdemeModal({ acik, onKapat }: OdemeModalProps) {
+// Ürün adından gider kategorisi tahmin et
+function kategoriTahmin(urunAdi: string): GiderKategori {
+  const ad = urunAdi.toLowerCase();
+  if (ad.includes("mama") || ad.includes("yem") || ad.includes("atıştır")) return "mama";
+  if (ad.includes("oyun") || ad.includes("top") || ad.includes("kemik")) return "oyuncak";
+  if (ad.includes("şampuan") || ad.includes("fırça") || ad.includes("tarak") || ad.includes("bakım")) return "bakim";
+  if (ad.includes("tasma") || ad.includes("gerdanlık") || ad.includes("kıyafet") || ad.includes("yatak")) return "aksesuar";
+  if (ad.includes("ilaç") || ad.includes("vitamin") || ad.includes("takviye")) return "ilac";
+  if (ad.includes("sigorta")) return "sigorta";
+  return "diger";
+}
+
+export default function OdemeModal({ acik, onKapat, kopekId }: OdemeModalProps) {
   const sepet = useSepet();
   const [teslimatAdresi, setTeslimatAdresi] = useState("");
   const [yukleniyor, setYukleniyor] = useState(false);
@@ -33,6 +48,23 @@ export default function OdemeModal({ acik, onKapat }: OdemeModalProps) {
 
     try {
       await siparisOlustur(sepet.items, teslimatAdresi);
+
+      // Satın alınan ürünleri otomatik olarak gider takibine ekle
+      if (kopekId) {
+        const simdi = Date.now();
+        for (const item of sepet.items) {
+          await db.giderler.add({
+            kopekId,
+            tarih: simdi,
+            kategori: kategoriTahmin(item.ad),
+            tutar: item.adet * item.birimFiyat,
+            baslik: `${item.ad}${item.adet > 1 ? ` x${item.adet}` : ""}`,
+            not: "Mağaza siparişi",
+            faturali: true,
+          });
+        }
+      }
+
       setBasarili(true);
       sepet.temizle();
 

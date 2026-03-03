@@ -1,16 +1,19 @@
 // =============================================================================
 // PuppyTimer Web - Tarih Yardimci Fonksiyonlari
-// DateExtensions.swift portlari (Intl.DateTimeFormat, tr-TR locale)
+// DateExtensions.swift portlari (Intl.DateTimeFormat, multi-locale support)
 // Tarihler number (timestamp in ms) olarak alinir.
 // =============================================================================
 
+// Type for supported locales
+type Locale = "tr-TR" | "en-US" | "es-ES" | "de-DE" | "fr-FR" | "pt-PT" | "ar-SA";
+
 // -----------------------------------------------------------------------------
 // turkceTarihSaat - Medium tarih + kisa saat
-// Ornek: "9 Sub 2026 14:30"
+// Ornek: "9 Sub 2026 14:30" (tr-TR), "Feb 9, 2026, 2:30 PM" (en-US)
 // -----------------------------------------------------------------------------
-export function turkceTarihSaat(date: number): string {
+export function turkceTarihSaat(date: number, locale: Locale = "tr-TR"): string {
   const d = new Date(date);
-  return new Intl.DateTimeFormat("tr-TR", {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(d);
@@ -18,11 +21,11 @@ export function turkceTarihSaat(date: number): string {
 
 // -----------------------------------------------------------------------------
 // turkceTarih - Sadece tarih (medium)
-// Ornek: "9 Sub 2026"
+// Ornek: "9 Sub 2026" (tr-TR), "Feb 9, 2026" (en-US)
 // -----------------------------------------------------------------------------
-export function turkceTarih(date: number): string {
+export function turkceTarih(date: number, locale: Locale = "tr-TR"): string {
   const d = new Date(date);
-  return new Intl.DateTimeFormat("tr-TR", {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
   }).format(d);
 }
@@ -31,9 +34,9 @@ export function turkceTarih(date: number): string {
 // turkceSaat - Sadece saat "HH:mm" formati
 // Ornek: "14:30"
 // -----------------------------------------------------------------------------
-export function turkceSaat(date: number): string {
+export function turkceSaat(date: number, locale: Locale = "tr-TR"): string {
   const d = new Date(date);
-  return new Intl.DateTimeFormat("tr-TR", {
+  return new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -41,10 +44,10 @@ export function turkceSaat(date: number): string {
 }
 
 // -----------------------------------------------------------------------------
-// goreceli - Gorece zaman (Turkce)
-// Ornek: "2 saat once", "5 dakika sonra"
+// goreceli - Gorece zaman (locale-aware)
+// Ornek: "2 saat once" (tr-TR), "2 hours ago" (en-US), "hace 2 horas" (es-ES)
 // -----------------------------------------------------------------------------
-export function goreceli(date: number): string {
+export function goreceli(date: number, locale: Locale = "tr-TR"): string {
   const simdi = Date.now();
   const farkMs = date - simdi;
   const farkSaniye = Math.round(farkMs / 1000);
@@ -55,7 +58,7 @@ export function goreceli(date: number): string {
   const farkAy = Math.round(farkGun / 30);
   const farkYil = Math.round(farkGun / 365);
 
-  const rtf = new Intl.RelativeTimeFormat("tr-TR", {
+  const rtf = new Intl.RelativeTimeFormat(locale, {
     numeric: "auto",
     style: "long",
   });

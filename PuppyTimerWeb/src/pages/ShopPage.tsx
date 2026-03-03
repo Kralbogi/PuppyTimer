@@ -4,6 +4,7 @@
 // =============================================================================
 
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { Search, Loader2, ShoppingBag } from "lucide-react";
 import { urunleriDinle } from "../services/urunService";
 import type { Urun } from "../types/models";
@@ -17,6 +18,8 @@ type Kategori = "Tümü" | "Mama" | "Oyuncak" | "Bakım" | "Aksesuar" | "Sağlı
 const KATEGORILER: Kategori[] = ["Tümü", "Mama", "Oyuncak", "Bakım", "Aksesuar", "Sağlık", "Taşıma"];
 
 export const ShopPage = () => {
+  const { id } = useParams<{ id: string }>();
+  const kopekId = id ? parseInt(id, 10) : undefined;
   const [urunler, setUrunler] = useState<Urun[]>([]);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [arama, setArama] = useState("");
@@ -130,6 +133,7 @@ export const ShopPage = () => {
       <OdemeModal
         acik={odemeModalAcik}
         onKapat={() => setOdemeModalAcik(false)}
+        kopekId={kopekId}
       />
     </div>
   );
