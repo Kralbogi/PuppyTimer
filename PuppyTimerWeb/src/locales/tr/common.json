@@ -1,0 +1,33 @@
+{
+  "buttons": {
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "add": "Ekle",
+    "close": "Kapat",
+    "confirm": "Onayla",
+    "back": "Geri",
+    "next": "İleri",
+    "submit": "Gönder",
+    "continue": "Devam Et"
+  },
+  "common": {
+    "loading": "Yükleniyor...",
+    "error": "Hata",
+    "success": "Başarılı",
+    "warning": "Uyarı",
+    "info": "Bilgi",
+    "or": "veya",
+    "and": "ve",
+    "optional": "Opsiyonel",
+    "required": "Zorunlu"
+  },
+  "navigation": {
+    "home": "Ana Sayfa",
+    "timers": "Programlar",
+    "health": "Sağlık",
+    "map": "Harita",
+    "menu": "Menü"
+  }
+}

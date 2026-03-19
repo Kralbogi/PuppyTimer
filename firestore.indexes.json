@@ -1,0 +1,37 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "toplulukMesajlari",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "aktif", "order": "ASCENDING" },
+        { "fieldPath": "tarih", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "haritaIsaretciler",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "aktif", "order": "ASCENDING" },
+        { "fieldPath": "guncellenmeTarihi", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "urunler",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "aktif", "order": "ASCENDING" },
+        { "fieldPath": "olusturmaTarihi", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "siparisler",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "kullaniciId", "order": "ASCENDING" },
+        { "fieldPath": "tarih", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

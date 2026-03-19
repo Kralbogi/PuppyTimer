@@ -1,0 +1,112 @@
+/* =============================================================================
+   PawLand - Premium Çerçeve Animasyonları
+   Harita pinleri ve profil kartları için animasyonlu çerçeve efektleri
+   ============================================================================= */
+
+/* Ateş - Alev efekti (turuncu/kırmızı/sarı dalgalanması) */
+@keyframes fire-flame {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.8), 0 0 40px rgba(234, 88, 12, 0.6), 0 0 60px rgba(249, 115, 22, 0.4);
+  }
+  25% {
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.8), 0 0 45px rgba(220, 38, 38, 0.6), 0 0 65px rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(251, 146, 60, 0.8), 0 0 50px rgba(249, 115, 22, 0.6), 0 0 70px rgba(251, 146, 60, 0.4);
+  }
+  75% {
+    box-shadow: 0 0 25px rgba(234, 88, 12, 0.8), 0 0 45px rgba(249, 115, 22, 0.6), 0 0 65px rgba(234, 88, 12, 0.4);
+  }
+}
+
+.animate-fire-flame {
+  animation: fire-flame 2s ease-in-out infinite !important;
+}
+
+/* Kral Tacı - Altın parıltı */
+@keyframes gold-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(251, 191, 36, 0.7), 0 0 30px rgba(245, 158, 11, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(251, 191, 36, 0.9), 0 0 50px rgba(245, 158, 11, 0.7), 0 0 75px rgba(251, 191, 36, 0.4);
+  }
+}
+
+.animate-gold-pulse {
+  animation: gold-pulse 2s ease-in-out infinite !important;
+}
+
+/* Kraliçe Tacı - Pembe shimmer */
+@keyframes pink-shimmer {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(236, 72, 153, 0.7), 0 0 30px rgba(219, 39, 119, 0.5);
+  }
+  33% {
+    box-shadow: 0 0 20px rgba(244, 114, 182, 0.8), 0 0 40px rgba(236, 72, 153, 0.6);
+  }
+  66% {
+    box-shadow: 0 0 20px rgba(219, 39, 119, 0.8), 0 0 40px rgba(190, 24, 93, 0.6);
+  }
+}
+
+.animate-pink-shimmer {
+  animation: pink-shimmer 3s ease-in-out infinite !important;
+}
+
+/* Kırmızı Kurdele - Yumuşak glow */
+@keyframes red-glow {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(220, 38, 38, 0.6), 0 0 24px rgba(185, 28, 28, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.8), 0 0 36px rgba(220, 38, 38, 0.6);
+  }
+}
+
+.animate-red-glow {
+  animation: red-glow 2s ease-in-out infinite !important;
+}
+
+/* Yıldız - Parlama efekti */
+@keyframes star-twinkle {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+  }
+  25% {
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.8), 0 0 40px rgba(59, 130, 246, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 1), 0 0 60px rgba(96, 165, 250, 0.8), 0 0 90px rgba(59, 130, 246, 0.5);
+  }
+  75% {
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.8), 0 0 40px rgba(59, 130, 246, 0.6);
+  }
+}
+
+.animate-star-twinkle {
+  animation: star-twinkle 2.5s ease-in-out infinite !important;
+}
+
+/* Elmas - Kristal ışıltı */
+@keyframes diamond-shimmer {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.7), 0 0 30px rgba(124, 58, 237, 0.5);
+  }
+  20% {
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.8), 0 0 40px rgba(139, 92, 246, 0.6), 0 0 60px rgba(124, 58, 237, 0.4);
+  }
+  40% {
+    box-shadow: 0 0 25px rgba(196, 181, 253, 0.9), 0 0 50px rgba(167, 139, 250, 0.7);
+  }
+  60% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.8), 0 0 40px rgba(124, 58, 237, 0.6);
+  }
+  80% {
+    box-shadow: 0 0 15px rgba(124, 58, 237, 0.7), 0 0 30px rgba(109, 40, 217, 0.5);
+  }
+}
+
+.animate-diamond-shimmer {
+  animation: diamond-shimmer 3s ease-in-out infinite !important;
+}

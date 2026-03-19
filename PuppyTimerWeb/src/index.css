@@ -1,0 +1,373 @@
+@import "tailwindcss";
+@import "./styles/frameAnimations.css";
+
+:root {
+  --color-primary: #e07a2f;
+  --color-primary-light: #f4a573;
+  --color-primary-dark: #c85a1f;
+  --color-bg: #faf6f0;
+  --color-bg-card: #fffcf7;
+  --color-text: #3d2e1f;
+  --color-text-muted: #8a7560;
+  --color-border: #e8ddd0;
+  --color-border-light: #ece5da;
+  --color-accent-warm: #d4845a;
+  --color-accent-light: #f5e6d3;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--color-bg);
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  color: var(--color-text);
+}
+
+input, textarea, select {
+  -webkit-user-select: auto;
+  user-select: auto;
+  font-size: 16px;
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* Rota bilgi badge (Leaflet Tooltip override) */
+.route-badge.leaflet-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  pointer-events: none;
+}
+.route-badge.leaflet-tooltip::before {
+  display: none !important;
+}
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+}
+
+
+/* Harita popup'larını warm temaya uyumlu yap */
+.leaflet-popup-content-wrapper {
+  background: var(--color-bg-card) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 20px rgba(61, 46, 31, 0.12) !important;
+}
+.leaflet-popup-tip {
+  background: var(--color-bg-card) !important;
+}
+
+/* Pati menü — alt menü kartı açılış animasyonu */
+@keyframes pawMenuSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Kopek avatar — haritada ziplama animasyonu */
+@keyframes kopek-avatar-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes kopek-avatar-shadow {
+  0%, 100% { transform: scaleX(1); opacity: 0.15; }
+  50% { transform: scaleX(0.6); opacity: 0.08; }
+}
+.kopek-avatar-bounce {
+  animation: kopek-avatar-bounce 1.5s ease-in-out infinite;
+}
+
+/* Akıcı gradient arka plan animasyonu */
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-8px) rotate(1deg); }
+  50% { transform: translateY(-16px) rotate(0deg); }
+  75% { transform: translateY(-8px) rotate(-1deg); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(224, 122, 47, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(224, 122, 47, 0.5); }
+}
+
+@keyframes soft-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.02); }
+}
+
+/* Floating orbs background */
+.bg-floating-orbs {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--color-bg) 0%, #fdf8f2 50%, var(--color-bg) 100%);
+}
+
+.bg-floating-orbs::before,
+.bg-floating-orbs::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.bg-floating-orbs::before {
+  width: 300px;
+  height: 300px;
+  background: var(--color-primary);
+  top: -50px;
+  right: -100px;
+  animation: float 8s ease-in-out infinite;
+}
+
+.bg-floating-orbs::after {
+  width: 250px;
+  height: 250px;
+  background: var(--color-accent-warm);
+  bottom: -75px;
+  left: -50px;
+  animation: float 10s ease-in-out infinite reverse;
+  animation-delay: 2s;
+}
+
+/* Smooth card hover effects */
+.card-hover-lift {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(224, 122, 47, 0.15);
+}
+
+/* Gradient text effect */
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-warm) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Smooth transitions */
+.smooth-transition {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Glass morphism effect */
+.glass-effect {
+  background: rgba(255, 252, 247, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(224, 122, 47, 0.1);
+}
+
+/* Glow effects */
+.glow-primary {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Soft shadow */
+.soft-shadow {
+  box-shadow: 0 8px 24px rgba(61, 46, 31, 0.08);
+}
+
+.soft-shadow-lg {
+  box-shadow: 0 12px 40px rgba(61, 46, 31, 0.12);
+}
+
+/* Smooth divider */
+.smooth-divider {
+  background: linear-gradient(to right, transparent, var(--color-border), transparent);
+  height: 1px;
+}
+
+/* Bounce animation for loading states */
+@keyframes bounce-smooth {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+  50% { transform: translateY(-4px) scale(1.05); opacity: 0.8; }
+}
+
+.bounce-smooth {
+  animation: bounce-smooth 1.5s ease-in-out infinite;
+}
+
+/* Fade and scale in */
+@keyframes fadeScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fade-scale-in {
+  animation: fadeScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Slide up animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Stagger effect for lists */
+.stagger-item:nth-child(1) { animation-delay: 0s; }
+.stagger-item:nth-child(2) { animation-delay: 0.05s; }
+.stagger-item:nth-child(3) { animation-delay: 0.1s; }
+.stagger-item:nth-child(4) { animation-delay: 0.15s; }
+.stagger-item:nth-child(5) { animation-delay: 0.2s; }
+.stagger-item:nth-child(n+6) { animation-delay: 0.25s; }
+
+/* Badge pulse effect */
+@keyframes badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(224, 122, 47, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(224, 122, 47, 0); }
+}
+
+.badge-pulse {
+  animation: badge-pulse 2s infinite;
+}
+
+/* Hover lift for interactive elements */
+.interactive-lift {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.interactive-lift:hover {
+  transform: translateY(-1px);
+}
+
+.interactive-lift:active {
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WARM PALETTE — Global Tailwind gray → warm tone remapping
+   Uygulama genelinde gri renk sınıflarını sıcak tonlara dönüştürür.
+   login/register sayfaları bg-white/80 gibi opacity modifier'lı sınıflar
+   kullandığından onlar etkilenmez (farklı CSS kuralı oluştururlar).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Arka plan renkleri ── */
+.bg-gray-50  { background-color: var(--color-bg) !important; }
+.bg-gray-100 { background-color: rgba(232, 221, 208, 0.45) !important; }
+.bg-gray-200 { background-color: rgba(232, 221, 208, 0.7) !important; }
+
+/* Solid beyaz yüzeyler → sıcak kart rengi */
+.bg-white { background-color: var(--color-bg-card) !important; }
+
+/* Hover arka planları */
+.hover\:bg-gray-50:hover  { background-color: rgba(244, 235, 222, 0.6) !important; }
+.hover\:bg-gray-100:hover { background-color: rgba(232, 221, 208, 0.55) !important; }
+
+/* ── Kenarlık renkleri ── */
+.border-gray-100 { border-color: var(--color-border-light) !important; }
+.border-gray-200 { border-color: var(--color-border) !important; }
+.border-gray-300 { border-color: var(--color-border) !important; }
+
+/* Hover kenarlıkları */
+.hover\:border-gray-300:hover { border-color: var(--color-primary) !important; }
+
+/* ── Metin renkleri ── */
+.text-gray-900 { color: var(--color-text) !important; }
+.text-gray-800 { color: var(--color-text) !important; }
+.text-gray-700 { color: var(--color-text-muted) !important; }
+.text-gray-600 { color: var(--color-text-muted) !important; }
+.text-gray-500 { color: var(--color-text-muted) !important; }
+.text-gray-400 { color: var(--color-text-muted) !important; opacity: 0.65; }
+.text-gray-300 { color: var(--color-text-muted) !important; opacity: 0.4; }
+
+/* ── Gradient primary buton yardımcı sınıfı ── */
+.btn-primary {
+  background: linear-gradient(135deg, #ff8c42, #e07a2f);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 10px 18px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-primary:hover  { opacity: 0.9; }
+.btn-primary:active { transform: scale(0.97); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ── Warm card yardımcı sınıfı ── */
+.warm-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(61, 46, 31, 0.06);
+}
+
+/* ── Warm sayfa arka planı ── */
+.warm-page {
+  background: var(--color-bg);
+  min-height: 100dvh;
+}
+
+/* ── Form input focus rengi ── */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(224, 122, 47, 0.12) !important;
+  outline: none !important;
+}
+
+/* ── Tailwind disabled gri button → warm ── */
+.disabled\:bg-gray-300:disabled {
+  background-color: var(--color-border) !important;
+}
+
+/* ── Divider çizgisi ── */
+hr, .divide-gray-100 > * + * {
+  border-color: var(--color-border-light) !important;
+}

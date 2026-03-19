@@ -1,0 +1,277 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // Admin helper — sunucu tarafında hardcoded UID ile değerlendirilir
+    // =========================================================================
+    function isAdmin() {
+      return request.auth != null &&
+             request.auth.uid == 'RIxq3gZxNVQjFueS7Aog0wo5wfn1';
+    }
+
+    // Topluluk köpekleri - herkes okuyabilir, sadece kendi köpeğini yazabilir
+    match /toplulukKopekleri/{dogId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null &&
+                      request.auth.uid == request.resource.data.olusturanId &&
+                      request.resource.data.begeniler == 0 &&
+                      request.resource.data.toplamBegeniler == 0;
+      allow update: if isAdmin() || (request.auth != null && (
+        // Owner can update all fields
+        (request.auth.uid == resource.data.olusturanId) ||
+        // Others can only increment begeniler and toplamBegeniler (and update guncellemeTarihi)
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['begeniler', 'toplamBegeniler', 'guncellemeTarihi'])
+      ));
+      allow delete: if isAdmin() ||
+                    (request.auth != null &&
+                     request.auth.uid == resource.data.olusturanId);
+
+      // Kopek yorumlari - herkes okuyabilir, sadece kendi yorumunu yazabilir
+      match /yorumlar/{commentId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null &&
+                        request.auth.uid == request.resource.data.olusturanId &&
+                        request.resource.data.icerik is string &&
+                        request.resource.data.icerik.size() > 0 &&
+                        request.resource.data.icerik.size() <= 500;
+        allow delete: if isAdmin() ||
+                      (request.auth != null &&
+                       request.auth.uid == resource.data.olusturanId);
+      }
+    }
+
+    // Topluluk bölgeleri - herkes okuyabilir, sadece kendi bölgesini yazabilir
+    match /toplulukBolgeleri/{zoneId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null &&
+                      request.auth.uid == request.resource.data.olusturanId;
+      allow update: if isAdmin() ||
+                    (request.auth != null &&
+                     request.auth.uid == resource.data.olusturanId);
+      allow delete: if isAdmin() ||
+                    (request.auth != null &&
+                     request.auth.uid == resource.data.olusturanId);
+
+      // Bolge yorumlari - herkes okuyabilir, sadece kendi yorumunu yazabilir
+      match /yorumlar/{commentId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null &&
+                        request.auth.uid == request.resource.data.olusturanId &&
+                        request.resource.data.icerik is string &&
+                        request.resource.data.icerik.size() > 0 &&
+                        request.resource.data.icerik.size() <= 500;
+        allow delete: if isAdmin() ||
+                      (request.auth != null &&
+                       request.auth.uid == resource.data.olusturanId);
+      }
+    }
+
+    // Arkadas istekleri - sadece ilgili kullanicilar okuyabilir/yazabilir
+    match /kopekArkadaslar/{friendId} {
+      allow read: if isAdmin() || (request.auth != null && (
+        request.auth.uid == resource.data.gonderenId ||
+        request.auth.uid == resource.data.aliciId
+      ));
+      allow create: if request.auth != null &&
+                      request.auth.uid == request.resource.data.gonderenId;
+      allow update: if request.auth != null && (
+        // Gonderen update yapabilir (cancel request)
+        request.auth.uid == resource.data.gonderenId ||
+        // Alici update yapabilir (accept/reject)
+        request.auth.uid == resource.data.aliciId
+      );
+      allow delete: if isAdmin() || (request.auth != null && (
+        request.auth.uid == resource.data.gonderenId ||
+        request.auth.uid == resource.data.aliciId
+      ));
+    }
+
+    // Online durum - herkes okuyabilir, sadece kendi durumunu yazabilir
+    match /kullaniciOnlineDurum/{userId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin() ||
+                   (request.auth != null && request.auth.uid == userId);
+    }
+
+    // Kullanici kopekleri - sadece kendi kopegini okuyabilir/yazabilir
+    match /kullaniciKopekleri/{userId}/kopekler/{dogId} {
+      allow read: if isAdmin() ||
+                  (request.auth != null && request.auth.uid == userId);
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Mesaj konusmalari - sadece katilimcilar okuyabilir/yazabilir
+    match /mesajKonusmalari/{konusmaId} {
+      // resource == null: belge henuz mevcut degil (varlik kontrolu icin okunuyor)
+      allow read: if isAdmin() || (request.auth != null && (
+        resource == null ||
+        request.auth.uid in resource.data.katilimcilar
+      ));
+      allow create: if request.auth != null &&
+        request.auth.uid in request.resource.data.katilimcilar;
+      allow update: if request.auth != null &&
+        request.auth.uid in resource.data.katilimcilar;
+
+      // Mesajlar subcollection
+      match /mesajlar/{mesajId} {
+        allow read: if isAdmin() || (request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/mesajKonusmalari/$(konusmaId)).data.katilimcilar);
+        allow create: if request.auth != null &&
+          request.auth.uid == request.resource.data.gonderenId &&
+          request.auth.uid in get(/databases/$(database)/documents/mesajKonusmalari/$(konusmaId)).data.katilimcilar;
+        allow update: if request.auth != null &&
+          request.auth.uid in get(/databases/$(database)/documents/mesajKonusmalari/$(konusmaId)).data.katilimcilar;
+      }
+    }
+
+    // Şikayetler - sadece kimlik doğrulaması yapılmış kullanıcılar okuyabilir/yazabilir
+    match /sikayetler/{sikayetId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null &&
+                      request.auth.uid == request.resource.data.sikayetEdenId &&
+                      request.auth.uid != request.resource.data.sikayetEdilenId &&
+                      request.resource.data.kategori in ['hakaret', 'spam', 'uygunsuz_gorsel', 'rahatsizlik'];
+      // Admin şikayeti işlendi olarak işaretleyebilir
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Kullanıcı cezaları - herkes okuyabilir (ceza durumunu kontrol için)
+    match /kullaniciCezalar/{userId} {
+      allow read: if request.auth != null;
+      // Admin manuel ban uygulayabilir; mevcut otomatik ceza sistemi de çalışır
+      allow write: if isAdmin() || request.auth != null;
+    }
+
+    // Eşsiz rümuz kaydı - herkes okuyabilir (uniqueness check için),
+    // sadece kendi kaydını yazabilir/silebilir
+    match /kullaniciRumuzlar/{rumuzId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null &&
+                      request.auth.uid == request.resource.data.uid;
+      allow update: if isAdmin() || (
+        request.auth != null &&
+        request.auth.uid == resource.data.uid &&
+        request.auth.uid == request.resource.data.uid
+      );
+      allow delete: if isAdmin() || (
+        request.auth != null &&
+        request.auth.uid == resource.data.uid
+      );
+    }
+
+    // FCM push token - admin okur, kullanıcı kendi token'ını yazar
+    match /fcmTokenlari/{userId} {
+      allow read: if isAdmin();
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Push bildirimleri kuyruğu - sadece admin oluşturur/okur
+    // Cloud Function Admin SDK ile günceller (kuralları atlar)
+    match /pushBildirimleri/{bildirimId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // Ürünler - herkes okuyabilir, sadece admin oluşturabilir/güncelleyebilir/silebilir
+    match /urunler/{urunId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if isAdmin();
+
+      // Ürün yorumları - herkes okuyabilir, sadece kimlik doğrulaması yapılmış kullanıcılar yazabilir
+      match /yorumlar/{yorumId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null &&
+                        request.auth.uid == request.resource.data.kullaniciId;
+        allow delete: if isAdmin();
+      }
+    }
+
+    // Siparişler - kullanıcılar sadece kendi siparişlerini okuyabilir/oluşturabilir
+    match /siparisler/{siparisId} {
+      allow read: if request.auth != null &&
+                  request.auth.uid == resource.data.kullaniciId;
+      allow create: if request.auth != null &&
+                    request.auth.uid == request.resource.data.kullaniciId;
+      allow update: if isAdmin();  // Admin sipariş durumunu güncelleyebilir
+    }
+
+    // Topluluk mesajları - herkes okuyabilir, kimlik doğrulaması yapılmış kullanıcılar yazabilir
+    match /toplulukMesajlari/{mesajId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null &&
+                      request.resource.data.gonderenId == request.auth.uid &&
+                      request.resource.data.icerik is string &&
+                      request.resource.data.icerik.size() > 0 &&
+                      request.resource.data.icerik.size() <= 150 &&
+                      request.resource.data.aktif == true;
+      allow update, delete: if false;  // Kimse güncelleyemez/silemez (sadece admin manuel)
+    }
+
+    // Ayarlar - herkes okuyabilir (hakaret kontrolü için), sadece admin yazabilir
+    match /ayarlar/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // Premium kullanıcılar - herkes kendi premium durumunu okuyabilir, sadece admin/Cloud Function yazabilir
+    match /premiumKullanicilar/{userId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // FCM tokenları - kullanıcı sadece kendi tokenını yazar/okur
+    match /fcmTokenlari/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow delete: if isAdmin();
+    }
+
+    // Push bildirimleri - sadece admin gönderir
+    match /pushBildirimleri/{docId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+    }
+
+    // Sipariş kayıtları - kullanıcı kendi siparişini okur, yazar
+    match /siparisler/{docId} {
+      allow read: if request.auth != null &&
+                    (resource.data.kullaniciId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null &&
+                     request.resource.data.kullaniciId == request.auth.uid;
+      allow update: if isAdmin();
+    }
+
+    // Arkadaşlık sistemi - ilgili kullanıcılar okur/yazar
+    match /arkadasliklar/{docId} {
+      allow read: if request.auth != null && (
+        resource.data.uid1 == request.auth.uid ||
+        resource.data.uid2 == request.auth.uid
+      );
+      allow create: if request.auth != null &&
+                     request.resource.data.gonderId == request.auth.uid;
+      allow update: if request.auth != null && (
+        resource.data.uid1 == request.auth.uid ||
+        resource.data.uid2 == request.auth.uid
+      );
+      allow delete: if request.auth != null && (
+        resource.data.uid1 == request.auth.uid ||
+        resource.data.uid2 == request.auth.uid
+      );
+    }
+
+    // macOS köpek verileri (kullanıcı bazlı)
+    match /kopekler_mac/{userId}/kopekler/{kopekId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /saglikNotlari_mac/{userId}/notlar/{notId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /asiKayitlari_mac/{userId}/kayitlar/{kayitId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

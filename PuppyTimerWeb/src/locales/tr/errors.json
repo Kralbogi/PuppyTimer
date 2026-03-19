@@ -1,0 +1,23 @@
+{
+  "auth": {
+    "invalidCredentials": "E-posta veya şifre hatalı",
+    "emailInUse": "Bu e-posta adresi zaten kullanılıyor",
+    "weakPassword": "Şifre çok zayıf. En az 6 karakter olmalıdır",
+    "invalidEmail": "Geçersiz e-posta adresi",
+    "userNotFound": "Kullanıcı bulunamadı",
+    "wrongPassword": "Hatalı şifre",
+    "tooManyRequests": "Çok fazla deneme. Lütfen daha sonra tekrar deneyin",
+    "networkError": "Ağ hatası. İnternet bağlantınızı kontrol edin",
+    "unknown": "Bir hata oluştu. Lütfen tekrar deneyin",
+    "passwordMismatch": "Şifreler eşleşmiyor",
+    "nameRequired": "Ad alanı zorunludur",
+    "emailRequired": "E-posta alanı zorunludur",
+    "passwordRequired": "Şifre alanı zorunludur"
+  },
+  "validation": {
+    "required": "Bu alan zorunludur",
+    "emailInvalid": "Geçersiz e-posta formatı",
+    "passwordTooShort": "Şifre en az 6 karakter olmalıdır",
+    "passwordMismatch": "Şifreler eşleşmiyor"
+  }
+}
