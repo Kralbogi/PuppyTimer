@@ -413,104 +413,216 @@ function Dog3D({ visuals, isHappy, onTap, aksesuarlar = [] }: Dog3DProps) {
         </group>
       )}
 
-      {/* Tasma (collar) */}
+      {/* Tasma (collar) — y=0.9 neck, z=0.3 clearly in front of body */}
       {aksesuarlar.includes("collar") && (
-        <group position={[0, 0.82, 0.15]}>
+        <group position={[0, 0.9, 0.3]}>
           <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.22, 0.025, 8, 24]} />
+            <torusGeometry args={[0.22, 0.03, 8, 24]} />
             <meshStandardMaterial color="#FF1493" roughness={0.3} metalness={0.5} />
           </mesh>
-          {/* Collar tag */}
-          <mesh position={[0, -0.08, 0.22]}>
-            <sphereGeometry args={[0.04, 8, 8]} />
-            <meshStandardMaterial color="#FFD700" roughness={0.2} metalness={0.8} />
+          {/* Tag hanging down front */}
+          <mesh position={[0, -0.05, 0.22]}>
+            <sphereGeometry args={[0.045, 8, 8]} />
+            <meshStandardMaterial color="#FFD700" roughness={0.2} metalness={0.9} />
           </mesh>
         </group>
       )}
 
-      {/* Gözlük (glasses) */}
+      {/* Gözlük (glasses) — z=0.50 in front of eye surface */}
       {aksesuarlar.includes("glasses") && (
-        <group position={[0, 1.08, 0.42]}>
-          {/* Left lens */}
+        <group position={[0, 1.08, 0.50]}>
           <mesh position={[-0.13, 0, 0]}>
-            <torusGeometry args={[0.08, 0.015, 8, 16]} />
+            <torusGeometry args={[0.075, 0.016, 8, 16]} />
             <meshStandardMaterial color="#1a1a1a" roughness={0.3} metalness={0.6} />
           </mesh>
-          <mesh position={[-0.13, 0, 0.01]}>
-            <circleGeometry args={[0.08, 16]} />
-            <meshStandardMaterial color="#ffffff" transparent opacity={0.15} roughness={0.1} metalness={0.3} />
+          <mesh position={[-0.13, 0, 0.005]}>
+            <circleGeometry args={[0.075, 16]} />
+            <meshStandardMaterial color="#55aaff" transparent opacity={0.25} roughness={0.1} metalness={0.2} />
           </mesh>
-          {/* Right lens */}
           <mesh position={[0.13, 0, 0]}>
-            <torusGeometry args={[0.08, 0.015, 8, 16]} />
+            <torusGeometry args={[0.075, 0.016, 8, 16]} />
             <meshStandardMaterial color="#1a1a1a" roughness={0.3} metalness={0.6} />
           </mesh>
-          <mesh position={[0.13, 0, 0.01]}>
-            <circleGeometry args={[0.08, 16]} />
-            <meshStandardMaterial color="#ffffff" transparent opacity={0.15} roughness={0.1} metalness={0.3} />
+          <mesh position={[0.13, 0, 0.005]}>
+            <circleGeometry args={[0.075, 16]} />
+            <meshStandardMaterial color="#55aaff" transparent opacity={0.25} roughness={0.1} metalness={0.2} />
           </mesh>
           {/* Bridge */}
-          <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.012, 0.012, 0.1, 8]} />
+          <mesh rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.012, 0.012, 0.11, 8]} />
+            <meshStandardMaterial color="#1a1a1a" roughness={0.3} metalness={0.6} />
+          </mesh>
+          {/* Left arm */}
+          <mesh position={[-0.2, 0, -0.04]} rotation={[0, -0.5, 0]}>
+            <cylinderGeometry args={[0.009, 0.009, 0.12, 6]} />
+            <meshStandardMaterial color="#1a1a1a" roughness={0.3} metalness={0.6} />
+          </mesh>
+          <mesh position={[0.2, 0, -0.04]} rotation={[0, 0.5, 0]}>
+            <cylinderGeometry args={[0.009, 0.009, 0.12, 6]} />
             <meshStandardMaterial color="#1a1a1a" roughness={0.3} metalness={0.6} />
           </mesh>
         </group>
       )}
 
-      {/* Bandana */}
+      {/* Bandana — z=0.32 in front of neck, small triangle */}
       {aksesuarlar.includes("bandana") && (
-        <group position={[0, 0.8, 0.1]}>
-          <mesh rotation={[0.3, 0, 0]}>
-            <coneGeometry args={[0.25, 0.18, 4]} />
-            <meshStandardMaterial color="#FF4500" roughness={0.7} />
+        <group position={[0, 0.83, 0.32]}>
+          {/* Triangle front */}
+          <mesh rotation={[-0.2, 0, 0]}>
+            <coneGeometry args={[0.15, 0.22, 3]} />
+            <meshStandardMaterial color="#FF4500" roughness={0.6} side={2} />
           </mesh>
-          {/* Bandana knot */}
-          <mesh position={[0, 0.05, -0.25]} scale={[0.08, 0.06, 0.08]}>
-            <sphereGeometry args={[1, 8, 8]} />
-            <meshStandardMaterial color="#FF4500" roughness={0.7} />
-          </mesh>
-        </group>
-      )}
-
-      {/* Fiyonk (bow) - on head */}
-      {aksesuarlar.includes("bow") && (
-        <group position={[0, 1.28 * sc + (1 - sc) * 0.3, 0.15]}>
-          {/* Left bow */}
-          <mesh position={[-0.08, 0, 0]} rotation={[0, 0, -0.3]}>
-            <sphereGeometry args={[0.08, 8, 8]} />
-            <meshStandardMaterial color="#FF69B4" roughness={0.5} />
-          </mesh>
-          {/* Right bow */}
-          <mesh position={[0.08, 0, 0]} rotation={[0, 0, 0.3]}>
-            <sphereGeometry args={[0.08, 8, 8]} />
-            <meshStandardMaterial color="#FF69B4" roughness={0.5} />
-          </mesh>
-          {/* Center knot */}
-          <mesh position={[0, 0, 0]}>
+          {/* Knot back */}
+          <mesh position={[0, 0.08, -0.16]}>
             <sphereGeometry args={[0.04, 8, 8]} />
-            <meshStandardMaterial color="#FF1493" roughness={0.5} />
+            <meshStandardMaterial color="#CC3300" roughness={0.6} />
           </mesh>
         </group>
       )}
 
-      {/* Atkı (scarf) */}
+      {/* Fiyonk (bow) — on top-front of head */}
+      {aksesuarlar.includes("bow") && (
+        <group position={[0, 1.30 * sc + (1 - sc) * 0.3, 0.36]}>
+          <mesh position={[-0.09, 0, 0]} rotation={[0, 0.1, -0.35]}>
+            <sphereGeometry args={[0.085, 8, 8]} />
+            <meshStandardMaterial color="#FF69B4" roughness={0.4} />
+          </mesh>
+          <mesh position={[0.09, 0, 0]} rotation={[0, -0.1, 0.35]}>
+            <sphereGeometry args={[0.085, 8, 8]} />
+            <meshStandardMaterial color="#FF69B4" roughness={0.4} />
+          </mesh>
+          <mesh>
+            <sphereGeometry args={[0.042, 8, 8]} />
+            <meshStandardMaterial color="#FF1493" roughness={0.4} />
+          </mesh>
+          {/* Small trails */}
+          <mesh position={[-0.06, -0.1, 0]} rotation={[0.2, 0, 0.5]}>
+            <cylinderGeometry args={[0.016, 0.008, 0.14, 6]} />
+            <meshStandardMaterial color="#FF69B4" roughness={0.5} />
+          </mesh>
+          <mesh position={[0.06, -0.1, 0]} rotation={[0.2, 0, -0.5]}>
+            <cylinderGeometry args={[0.016, 0.008, 0.14, 6]} />
+            <meshStandardMaterial color="#FF69B4" roughness={0.5} />
+          </mesh>
+        </group>
+      )}
+
+      {/* Atkı (scarf) — z=0.3 visible at chest */}
       {aksesuarlar.includes("scarf") && (
-        <group position={[0, 0.75, 0.1]}>
-          {/* Main scarf loop */}
+        <group position={[0, 0.88, 0.3]}>
           <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <torusGeometry args={[0.23, 0.035, 6, 16]} />
+            <torusGeometry args={[0.21, 0.038, 6, 16]} />
             <meshStandardMaterial color="#FF8C00" roughness={0.8} />
           </mesh>
-          {/* Left hanging end */}
-          <mesh position={[-0.15, -0.18, 0.2]} rotation={[0.4, 0, -0.2]}>
-            <cylinderGeometry args={[0.03, 0.04, 0.25, 6]} />
+          {/* Hanging end front-left */}
+          <mesh position={[-0.12, -0.22, 0.18]} rotation={[0.3, 0, -0.15]}>
+            <cylinderGeometry args={[0.032, 0.024, 0.3, 6]} />
             <meshStandardMaterial color="#FF8C00" roughness={0.8} />
           </mesh>
-          {/* Right hanging end */}
-          <mesh position={[0.15, -0.15, 0.18]} rotation={[0.35, 0, 0.15]}>
-            <cylinderGeometry args={[0.03, 0.04, 0.22, 6]} />
-            <meshStandardMaterial color="#FF8C00" roughness={0.8} />
+          <mesh position={[-0.1, -0.38, 0.18]}>
+            <sphereGeometry args={[0.03, 6, 6]} />
+            <meshStandardMaterial color="#FF6600" roughness={0.8} />
           </mesh>
+        </group>
+      )}
+
+      {/* Taç (crown) */}
+      {aksesuarlar.includes("crown") && (
+        <group position={[0, 1.48 * sc + (1 - sc) * 0.3, 0.06]}>
+          {/* Base ring */}
+          <mesh rotation={[0, 0, 0]}>
+            <cylinderGeometry args={[0.2, 0.22, 0.07, 16]} />
+            <meshStandardMaterial color="#FFD700" roughness={0.1} metalness={0.9} />
+          </mesh>
+          {/* Center spike */}
+          <mesh position={[0, 0.15, 0]}>
+            <cylinderGeometry args={[0.025, 0.04, 0.2, 6]} />
+            <meshStandardMaterial color="#FFD700" roughness={0.1} metalness={0.9} />
+          </mesh>
+          <mesh position={[0, 0.27, 0]}>
+            <sphereGeometry args={[0.04, 8, 8]} />
+            <meshStandardMaterial color="#FF4444" roughness={0.1} metalness={0.5} />
+          </mesh>
+          {/* Left spike */}
+          <mesh position={[-0.12, 0.1, 0]} rotation={[0, 0, 0.4]}>
+            <cylinderGeometry args={[0.02, 0.03, 0.16, 6]} />
+            <meshStandardMaterial color="#FFD700" roughness={0.1} metalness={0.9} />
+          </mesh>
+          <mesh position={[-0.18, 0.2, 0]}>
+            <sphereGeometry args={[0.03, 8, 8]} />
+            <meshStandardMaterial color="#4444FF" roughness={0.1} metalness={0.5} />
+          </mesh>
+          {/* Right spike */}
+          <mesh position={[0.12, 0.1, 0]} rotation={[0, 0, -0.4]}>
+            <cylinderGeometry args={[0.02, 0.03, 0.16, 6]} />
+            <meshStandardMaterial color="#FFD700" roughness={0.1} metalness={0.9} />
+          </mesh>
+          <mesh position={[0.18, 0.2, 0]}>
+            <sphereGeometry args={[0.03, 8, 8]} />
+            <meshStandardMaterial color="#44FF44" roughness={0.1} metalness={0.5} />
+          </mesh>
+        </group>
+      )}
+
+      {/* Kanatlar (wings) */}
+      {aksesuarlar.includes("wings") && (
+        <group position={[0, 0.95, -0.15]}>
+          {/* Left wing upper */}
+          <mesh position={[-0.3, 0.15, 0]} rotation={[0, 0.3, 0.2]}>
+            <sphereGeometry args={[0.18, 8, 6]} />
+            <meshStandardMaterial color="#7EC8E3" roughness={0.3} transparent opacity={0.85} />
+          </mesh>
+          <mesh position={[-0.22, -0.08, 0]} rotation={[0, 0.2, 0.5]}>
+            <sphereGeometry args={[0.12, 8, 6]} />
+            <meshStandardMaterial color="#A8D8EA" roughness={0.3} transparent opacity={0.8} />
+          </mesh>
+          {/* Right wing upper */}
+          <mesh position={[0.3, 0.15, 0]} rotation={[0, -0.3, -0.2]}>
+            <sphereGeometry args={[0.18, 8, 6]} />
+            <meshStandardMaterial color="#7EC8E3" roughness={0.3} transparent opacity={0.85} />
+          </mesh>
+          <mesh position={[0.22, -0.08, 0]} rotation={[0, -0.2, -0.5]}>
+            <sphereGeometry args={[0.12, 8, 6]} />
+            <meshStandardMaterial color="#A8D8EA" roughness={0.3} transparent opacity={0.8} />
+          </mesh>
+        </group>
+      )}
+
+      {/* Pelerin (cape) */}
+      {aksesuarlar.includes("cape") && (
+        <group position={[0, 0.88, -0.22]}>
+          {/* Cape body */}
+          <mesh rotation={[-0.2, 0, 0]}>
+            <coneGeometry args={[0.32, 0.55, 8]} />
+            <meshStandardMaterial color="#CC0000" roughness={0.6} side={2} />
+          </mesh>
+          {/* Cape collar */}
+          <mesh position={[0, 0.3, 0.08]}>
+            <cylinderGeometry args={[0.22, 0.22, 0.06, 12]} />
+            <meshStandardMaterial color="#FFD700" roughness={0.3} metalness={0.4} />
+          </mesh>
+        </group>
+      )}
+
+      {/* Yıldız (star_bow) */}
+      {aksesuarlar.includes("star_bow") && (
+        <group position={[0.14, 1.28 * sc + (1 - sc) * 0.3, 0.22]}>
+          {/* Star center */}
+          <mesh>
+            <sphereGeometry args={[0.07, 8, 8]} />
+            <meshStandardMaterial color="#FFD700" roughness={0.1} metalness={0.8} emissive="#FFD700" emissiveIntensity={0.3} />
+          </mesh>
+          {/* Star points */}
+          {[0, 1, 2, 3, 4].map((i) => (
+            <mesh key={i} position={[
+              Math.cos((i / 5) * Math.PI * 2) * 0.09,
+              Math.sin((i / 5) * Math.PI * 2) * 0.09,
+              0
+            ]}>
+              <sphereGeometry args={[0.03, 6, 6]} />
+              <meshStandardMaterial color="#FFD700" roughness={0.1} metalness={0.8} emissive="#FFD700" emissiveIntensity={0.4} />
+            </mesh>
+          ))}
         </group>
       )}
     </group>

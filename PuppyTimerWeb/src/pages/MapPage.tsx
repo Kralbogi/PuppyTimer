@@ -262,9 +262,13 @@ function getBolgeIcon(tur: BolgeTuruType) {
 export const MapPage: React.FC<MapPageProps> = ({ kopekId }) => {
   const navigate = useNavigate();
   const vm = useHaritaViewModel(kopekId);
-  const topluluk = useToplulukViewModel();
-  const arkadasVM = useArkadasViewModel();
   const { konum: kullaniciBaslangicKonumu } = useKonum();
+  const topluluk = useToplulukViewModel(
+    kullaniciBaslangicKonumu
+      ? { lat: kullaniciBaslangicKonumu[0], lng: kullaniciBaslangicKonumu[1] }
+      : null
+  );
+  const arkadasVM = useArkadasViewModel();
 
   const [mapMode, setMapMode] = useState<"benim" | "topluluk">("benim");
   const [showAddModal, setShowAddModal] = useState(false);

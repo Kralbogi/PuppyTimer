@@ -7,9 +7,10 @@
 // 4. stripeWebhook  — Stripe webhook: ödeme tamamlandığında premium ver
 // =============================================================================
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.stripeWebhook = exports.createCheckout = exports.sendPush = exports.analyzeAI = void 0;
+exports.hatirlaticiKontrol = exports.stripeWebhook = exports.createCheckout = exports.sendPush = exports.analyzeAI = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const firestore_1 = require("firebase-functions/v2/firestore");
+const scheduler_1 = require("firebase-functions/v2/scheduler");
 const params_1 = require("firebase-functions/params");
 const admin = require("firebase-admin");
 const sdk_1 = require("@anthropic-ai/sdk");
@@ -236,5 +237,75 @@ exports.stripeWebhook = (0, https_1.onRequest)({ secrets: [STRIPE_SECRET, STRIPE
         await db.collection("premiumKullanicilar").doc(uid).set(premiumData);
     }
     res.json({ received: true });
+});
+// =============================================================================
+// 5. hatirlaticiKontrol — Her dakika çalışır, vadesi gelen hatırlatıcılara FCM push gönderir
+// =============================================================================
+exports.hatirlaticiKontrol = (0, scheduler_1.onSchedule)({ schedule: "every 1 minutes", timeZone: "Europe/Istanbul" }, async () => {
+    const simdi = new Date();
+    const saat = `${String(simdi.getHours()).padStart(2, "0")}:${String(simdi.getMinutes()).padStart(2, "0")}`;
+    // JS: 0=Pazar → bizim: 6=Pazar; JS:1=Pzt → bizim: 0=Pzt
+    const jsDay = simdi.getDay();
+    const gun = jsDay === 0 ? 6 : jsDay - 1;
+    const snapshot = await db.collection("hatirlaticilar").get();
+    for (const kullaniciDoc of snapshot.docs) {
+        const userId = kullaniciDoc.id;
+        const liste = (kullaniciDoc.data().liste ?? []);
+        for (const h of liste) {
+            if (!h.aktif)
+                continue;
+            if (h.saat !== saat)
+                continue;
+            if (!h.gunler.includes(gun))
+                continue;
+            // Bugün bu alarm zaten gönderildi mi?
+            const firedKey = `${simdi.toDateString()}_${h.id}`;
+            const firedDoc = await db
+                .collection("hatirlaticiGonderildi")
+                .doc(`${userId}_${firedKey}`)
+                .get();
+            if (firedDoc.exists)
+                continue;
+            // FCM tokenı al
+            const tokenDoc = await db.collection("fcmTokenlari").doc(userId).get();
+            const token = tokenDoc.data()?.token;
+            if (!token)
+                continue;
+            // Push gönder
+            const TUR_EMOJI = {
+                beslenme: "🍖", yuruyus: "🦮", ilac: "💊", asi: "💉",
+                bakim: "✂️", veteriner: "🏥", diger: "🔔",
+            };
+            try {
+                await admin.messaging().send({
+                    token,
+                    notification: {
+                        title: `${TUR_EMOJI[h.tur] ?? "🔔"} ${h.baslik}`,
+                        body: "PawLand hatırlatıcısı",
+                    },
+                    webpush: {
+                        notification: {
+                            icon: "https://pawland3448.web.app/icons/icon-192.png",
+                            badge: "https://pawland3448.web.app/icons/icon-192.png",
+                            vibrate: [100, 50, 100],
+                        },
+                        fcmOptions: { link: "https://pawland3448.web.app" },
+                    },
+                });
+                // Gönderildi olarak işaretle (24 saat sonra temizlenmesi için TTL)
+                await db
+                    .collection("hatirlaticiGonderildi")
+                    .doc(`${userId}_${firedKey}`)
+                    .set({ gonderildiAt: admin.firestore.FieldValue.serverTimestamp() });
+            }
+            catch (err) {
+                console.error(`[hatirlaticiKontrol] Push gönderilemedi ${userId}:`, err);
+                // Geçersiz token ise sil
+                if (err.code === "messaging/registration-token-not-registered") {
+                    await db.collection("fcmTokenlari").doc(userId).delete();
+                }
+            }
+        }
+    }
 });
 //# sourceMappingURL=index.js.map

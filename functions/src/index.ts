@@ -8,6 +8,7 @@
 
 import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import { defineSecret } from "firebase-functions/params";
 import * as admin from "firebase-admin";
 import Anthropic from "@anthropic-ai/sdk";
@@ -303,5 +304,88 @@ export const stripeWebhook = onRequest(
     }
 
     res.json({ received: true });
+  }
+);
+
+// =============================================================================
+// 5. hatirlaticiKontrol — Her dakika çalışır, vadesi gelen hatırlatıcılara FCM push gönderir
+// =============================================================================
+export const hatirlaticiKontrol = onSchedule(
+  { schedule: "every 1 minutes", timeZone: "Europe/Istanbul" },
+  async () => {
+    const simdi = new Date();
+    const saat = `${String(simdi.getHours()).padStart(2, "0")}:${String(simdi.getMinutes()).padStart(2, "0")}`;
+    // JS: 0=Pazar → bizim: 6=Pazar; JS:1=Pzt → bizim: 0=Pzt
+    const jsDay = simdi.getDay();
+    const gun = jsDay === 0 ? 6 : jsDay - 1;
+
+    const snapshot = await db.collection("hatirlaticilar").get();
+
+    for (const kullaniciDoc of snapshot.docs) {
+      const userId = kullaniciDoc.id;
+      const liste = (kullaniciDoc.data().liste ?? []) as Array<{
+        id: string;
+        baslik: string;
+        tur: string;
+        saat: string;
+        gunler: number[];
+        aktif: boolean;
+      }>;
+
+      for (const h of liste) {
+        if (!h.aktif) continue;
+        if (h.saat !== saat) continue;
+        if (!h.gunler.includes(gun)) continue;
+
+        // Bugün bu alarm zaten gönderildi mi?
+        const firedKey = `${simdi.toDateString()}_${h.id}`;
+        const firedDoc = await db
+          .collection("hatirlaticiGonderildi")
+          .doc(`${userId}_${firedKey}`)
+          .get();
+        if (firedDoc.exists) continue;
+
+        // FCM tokenı al
+        const tokenDoc = await db.collection("fcmTokenlari").doc(userId).get();
+        const token = tokenDoc.data()?.token as string | undefined;
+        if (!token) continue;
+
+        // Push gönder
+        const TUR_EMOJI: Record<string, string> = {
+          beslenme: "🍖", yuruyus: "🦮", ilac: "💊", asi: "💉",
+          bakim: "✂️", veteriner: "🏥", diger: "🔔",
+        };
+
+        try {
+          await admin.messaging().send({
+            token,
+            notification: {
+              title: `${TUR_EMOJI[h.tur] ?? "🔔"} ${h.baslik}`,
+              body: "PawLand hatırlatıcısı",
+            },
+            webpush: {
+              notification: {
+                icon: "https://pawland3448.web.app/icons/icon-192.png",
+                badge: "https://pawland3448.web.app/icons/icon-192.png",
+                vibrate: [100, 50, 100],
+              },
+              fcmOptions: { link: "https://pawland3448.web.app" },
+            },
+          });
+
+          // Gönderildi olarak işaretle (24 saat sonra temizlenmesi için TTL)
+          await db
+            .collection("hatirlaticiGonderildi")
+            .doc(`${userId}_${firedKey}`)
+            .set({ gonderildiAt: admin.firestore.FieldValue.serverTimestamp() });
+        } catch (err) {
+          console.error(`[hatirlaticiKontrol] Push gönderilemedi ${userId}:`, err);
+          // Geçersiz token ise sil
+          if ((err as { code?: string }).code === "messaging/registration-token-not-registered") {
+            await db.collection("fcmTokenlari").doc(userId).delete();
+          }
+        }
+      }
+    }
   }
 );

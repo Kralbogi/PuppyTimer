@@ -75,9 +75,29 @@ function DogLayout() {
   // Her 30 saniyede hatırlatıcı alarmlarını kontrol et
   useEffect(() => {
     if (!kopekId) return
+    const TUR_EMOJI: Record<string, string> = {
+      beslenme: "🍖", yuruyus: "🦮", ilac: "💊", asi: "💉",
+      bakim: "✂️", veteriner: "🏥", diger: "🔔",
+    }
     const kontrol = () => {
       const alarm = alarmKontrolEt(kopekId)
-      if (alarm) setAktifAlarm(alarm)
+      if (alarm) {
+        setAktifAlarm(alarm)
+        // Browser notification (tab kapalı ama tarayıcı açıkken de çalışır)
+        if (Notification.permission === 'granted') {
+          const emoji = TUR_EMOJI[alarm.tur] ?? '🔔'
+          navigator.serviceWorker.ready.then(reg => {
+            reg.showNotification(`${emoji} ${alarm.baslik}`, {
+              body: 'PawLand hatırlatıcısı',
+              icon: '/icons/icon-192.png',
+              badge: '/icons/icon-192.png',
+              vibrate: [100, 50, 100],
+            } as NotificationOptions)
+          }).catch(() => {
+            new Notification(`${emoji} ${alarm.baslik}`, { body: 'PawLand hatırlatıcısı' })
+          })
+        }
+      }
     }
     kontrol()
     const interval = setInterval(kontrol, 30_000)

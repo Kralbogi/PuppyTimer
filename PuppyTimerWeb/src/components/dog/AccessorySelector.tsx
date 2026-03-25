@@ -20,12 +20,12 @@ interface AksesuarItem {
 }
 
 const AKSESUARLAR: AksesuarItem[] = [
-  { id: "hat",       label: "Şapka",     emoji: "🎩",  tip: "premium" },
-  { id: "collar",    label: "Tasma",     emoji: "📿",  tip: "premium" },
-  { id: "glasses",   label: "Gözlük",    emoji: "🕶️",  tip: "premium" },
-  { id: "bandana",   label: "Bandana",   emoji: "🧣",  tip: "premium" },
-  { id: "bow",       label: "Fiyonk",    emoji: "🎀",  tip: "premium" },
-  { id: "scarf",     label: "Atkı",      emoji: "🧤",  tip: "premium" },
+  { id: "hat",       label: "Şapka",     emoji: "🎩",  tip: "free" },
+  { id: "collar",    label: "Tasma",     emoji: "📿",  tip: "free" },
+  { id: "glasses",   label: "Gözlük",    emoji: "🕶️",  tip: "free" },
+  { id: "bandana",   label: "Bandana",   emoji: "🧣",  tip: "free" },
+  { id: "bow",       label: "Fiyonk",    emoji: "🎀",  tip: "free" },
+  { id: "scarf",     label: "Atkı",      emoji: "🧤",  tip: "free" },
   // Satın alınabilir özel itemlar
   { id: "crown",     label: "Taç",       emoji: "👑",  tip: "satin_al", fiyat: "₺9,99" },
   { id: "wings",     label: "Kanatlar",  emoji: "🦋",  tip: "satin_al", fiyat: "₺6,99" },
@@ -45,6 +45,7 @@ interface AccessorySelectorProps {
   onChange: (aksesuarlar: string[]) => void;
   isPremium: boolean;
   onPremiumUpsell?: () => void;
+  onPreviewRequest?: (item: SatinAlItem) => void;
 }
 
 export default function AccessorySelector({
@@ -52,18 +53,24 @@ export default function AccessorySelector({
   onChange,
   isPremium,
   onPremiumUpsell,
+  onPreviewRequest,
 }: AccessorySelectorProps) {
   const [satinAlItem, setSatinAlItem] = useState<SatinAlItem | null>(null);
 
   const handleToggle = (item: AksesuarItem) => {
     if (item.tip === "satin_al") {
-      setSatinAlItem({
+      const satinAlData: SatinAlItem = {
         id: item.id,
         label: item.label,
         emoji: item.emoji,
         fiyat: item.fiyat!,
         aciklama: ACIKLAMALAR[item.id],
-      });
+      };
+      if (onPreviewRequest) {
+        onPreviewRequest(satinAlData);
+      } else {
+        setSatinAlItem(satinAlData);
+      }
       return;
     }
     if (item.tip === "premium" && !isPremium) {

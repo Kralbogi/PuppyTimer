@@ -7,6 +7,10 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Plus, X, Trash2, Bell, BellOff, Edit2 } from "lucide-react";
 import type { Hatirlatici, HatirlaticiTuru } from "../types/models";
+import { doc, setDoc } from "firebase/firestore";
+import { firestore } from "../services/firebase";
+import { kullaniciIdGetir } from "../services/kullaniciKimlik";
+import { fcmTokenKaydet } from "../services/fcmService";
 
 const TUR_BILGI: Record<HatirlaticiTuru, { label: string; emoji: string; color: string; bg: string }> = {
   beslenme: { label: "Beslenme", emoji: "", color: "text-orange-600", bg: "bg-orange-50" },
@@ -42,6 +46,20 @@ function generateId() {
   return `h_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 }
 
+// Hatırlatıcıları Firestore'a senkronize et (Cloud Function bu koleksiyonu okur)
+async function firestoreSync(liste: Hatirlatici[]) {
+  try {
+    const userId = kullaniciIdGetir();
+    await setDoc(
+      doc(firestore, "hatirlaticilar", userId),
+      { liste, guncellenmeTarihi: Date.now() },
+      { merge: false }
+    );
+  } catch {
+    // Sessizce geç — localStorage her zaman çalışır
+  }
+}
+
 export const HatirlaticiPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const kopekId = id ? parseInt(id, 10) : 0;
@@ -59,6 +77,11 @@ export const HatirlaticiPage: React.FC = () => {
   useEffect(() => {
     setHatirlaticilar(loadHatirlaticilar(kopekId));
   }, [kopekId]);
+
+  // FCM token al (bildirim izni iste)
+  useEffect(() => {
+    fcmTokenKaydet().catch(() => {});
+  }, []);
 
   const formTemizle = () => {
     setBaslik("");
@@ -110,6 +133,7 @@ export const HatirlaticiPage: React.FC = () => {
 
     saveHatirlaticilar(kopekId, guncelleme);
     setHatirlaticilar(guncelleme);
+    firestoreSync(guncelleme);
     setShowModal(false);
     formTemizle();
   };
@@ -121,6 +145,7 @@ export const HatirlaticiPage: React.FC = () => {
     const yeni = hatirlaticilar.filter((h) => h.id !== hId);
     saveHatirlaticilar(kopekId, yeni);
     setHatirlaticilar(yeni);
+    firestoreSync(yeni);
   };
 
   const handleToggle = (hId: string) => {
@@ -129,6 +154,7 @@ export const HatirlaticiPage: React.FC = () => {
     );
     saveHatirlaticilar(kopekId, yeni);
     setHatirlaticilar(yeni);
+    firestoreSync(yeni);
   };
 
   const toggleGun = (g: number) => {
@@ -176,7 +202,7 @@ export const HatirlaticiPage: React.FC = () => {
         <div className="flex items-start gap-3">
           <Bell size={18} className="text-blue-500 mt-0.5 flex-shrink-0" />
           <p className="text-sm text-blue-700">
-            Hatırlatıcılar bu cihazda yerel olarak saklanır. Uygulama açıkken sizi bilgilendirir.
+            Hatırlatıcılar bu cihaza push bildirim olarak gönderilir — uygulama kapalı olsa bile.
           </p>
         </div>
       </div>

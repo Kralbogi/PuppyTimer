@@ -26,14 +26,28 @@ import {
   kullaniciAdGetir,
 } from "../services/kullaniciKimlik";
 import { ensureAuth } from "../services/firebase";
-import { onlineDurumlariDinle } from "../services/arkadasService";
-import type { ToplulukBolge, ToplulukKopek, Kopek } from "../types/models";
+import { onlineDurumlariDinle, arkadaslarimiDinle } from "../services/arkadasService";
+import type { ToplulukBolge, ToplulukKopek, Kopek, KopekArkadas } from "../types/models";
 import { BolgeTuru } from "../types/enums";
 
-export function useToplulukViewModel() {
+// Haversine mesafe (metre)
+function haversineMetre(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+const YARICAP_METRE = 500;
+
+export function useToplulukViewModel(
+  kullaniciKonum?: { lat: number; lng: number } | null
+) {
   const [hamBolgeler, setHamBolgeler] = useState<ToplulukBolge[]>([]);
   const [hamKopekler, setHamKopekler] = useState<ToplulukKopek[]>([]);
   const [onlineDurumlar, setOnlineDurumlar] = useState<Map<string, boolean>>(new Map());
+  const [arkadaslar, setArkadaslar] = useState<KopekArkadas[]>([]);
   const [yukleniyor, setYukleniyor] = useState(true);
   const [kopekYukleniyor, setKopekYukleniyor] = useState(true);
   const [hata, setHata] = useState<string | null>(null);
@@ -138,31 +152,63 @@ export function useToplulukViewModel() {
   }, [hamKopekler]);
 
   // ---------------------------------------------------------------------------
+  // Arkadas listesini dinle
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    let unsub: (() => void) | undefined;
+    try {
+      unsub = arkadaslarimiDinle(setArkadaslar);
+    } catch {
+      // Auth henüz hazır değil, sessizce geç
+    }
+    return () => { if (unsub) unsub(); };
+  }, [kullaniciId]);
+
+  // ---------------------------------------------------------------------------
   // Online kullanicilarin kopeklerini filtrele + Zaman bazli filtreleme
   // ---------------------------------------------------------------------------
+
+  // Kabul edilmiş arkadaşların userId seti
+  const arkadasIdleri = useMemo(() => {
+    const ids = new Set<string>();
+    for (const a of arkadaslar) {
+      if (a.gonderenId === kullaniciId) ids.add(a.aliciId);
+      else if (a.aliciId === kullaniciId) ids.add(a.gonderenId);
+    }
+    return ids;
+  }, [arkadaslar, kullaniciId]);
 
   const toplulukKopekleri = useMemo(() => {
     const besDakikaOnce = Date.now() - 5 * 60 * 1000;
 
     return hamKopekler.filter((kopek) => {
-      // Kendi kopegimse her zaman goster
+      // Kendi köpeğim → her zaman göster
       if (kopek.olusturanId === kullaniciId) return true;
 
-      // Son 5 dakika icinde guncellenmeyen kayitlari gosterme (stale data)
-      if (kopek.guncellemeTarihi < besDakikaOnce) {
-        return false;
+      // Konum paylaşmayan (stale) → kimse göremez
+      if (kopek.guncellemeTarihi < besDakikaOnce) return false;
+
+      // Online değil → gösterme
+      if (onlineDurumlar.size > 0) {
+        const online = onlineDurumlar.get(kopek.olusturanId);
+        if (!online) return false;
       }
 
-      // Online durum kontrol - Online durumlar henuz yuklenmemisse goster
-      if (onlineDurumlar.size === 0) return true;
+      // Arkadaşsa → mesafeden bağımsız göster (konum paylaşıyorsa)
+      if (arkadasIdleri.has(kopek.olusturanId)) return true;
 
-      // Kullanicinin online durumu
-      const online = onlineDurumlar.get(kopek.olusturanId);
+      // Yabancı → kullanıcının konumu yoksa gösterme
+      if (!kullaniciKonum) return false;
 
-      // Online durumu yoksa veya offline ise gosterme
-      return online === true;
+      // 500 metre yarıçapı kontrolü
+      const mesafe = haversineMetre(
+        kullaniciKonum.lat, kullaniciKonum.lng,
+        kopek.enlem, kopek.boylam
+      );
+      return mesafe <= YARICAP_METRE;
     });
-  }, [hamKopekler, onlineDurumlar, kullaniciId]);
+  }, [hamKopekler, onlineDurumlar, kullaniciId, kullaniciKonum, arkadasIdleri]);
 
   // ---------------------------------------------------------------------------
   // Canli bolge algilama + filtreleme

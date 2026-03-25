@@ -23,7 +23,6 @@ import {
   Trophy,
   QrCode,
   Share2,
-  Bot,
 } from "lucide-react";
 const AnimatedDog3D = lazy(() => import("../components/common/AnimatedDog3D"));
 import PhotoPicker from "../components/common/PhotoPicker";
@@ -42,7 +41,7 @@ import { bugunDogumGunuMu } from "../services/dateUtils";
 import { premiumMi, renkDegisiklikHakkiKontrol, renkDegisiklikSayaciniArtir, isimDegisiklikHakkiKontrol, isimDegisiklikSayaciniArtir } from "../services/premiumService";
 import QRCodeModal from "../components/dog/QRCodeModal";
 import SocialShareCard from "../components/dog/SocialShareCard";
-import AIAssistantModal from "../components/ai/AIAssistantModal";
+import SatinAlModal, { type SatinAlItem } from "../components/dog/SatinAlModal";
 
 // -----------------------------------------------------------------------------
 // Helper: Calculate age from birthdate timestamp
@@ -166,6 +165,10 @@ export const DogProfilePage: React.FC<DogProfilePageProps> = ({ kopekId }) => {
   const [kalanRenkHakki, setKalanRenkHakki] = useState(2);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
+  // Aksesuar önizleme
+  const [previewAksesuar, setPreviewAksesuar] = useState<SatinAlItem | null>(null);
+  const [showSatinAlModal, setShowSatinAlModal] = useState(false);
+
   // QR Code modal state
   const [showQRModal, setShowQRModal] = useState(false);
 
@@ -173,7 +176,6 @@ export const DogProfilePage: React.FC<DogProfilePageProps> = ({ kopekId }) => {
   const [showShareModal, setShowShareModal] = useState(false);
 
   // AI Assistant modal state
-  const [showAIModal, setShowAIModal] = useState(false);
 
   // ---------------------------------------------------------------------------
   // Live queries
@@ -417,10 +419,8 @@ export const DogProfilePage: React.FC<DogProfilePageProps> = ({ kopekId }) => {
       // Kisir durumu
       updates.kisir = editKisir;
 
-      // Aksesuarlar (Premium özellik - sadece kaydet)
-      if (isPremium) {
-        updates.aksesuarlar = editAksesuarlar;
-      }
+      // Aksesuarlar
+      updates.aksesuarlar = editAksesuarlar;
 
       // Çerçeve Tipi (Premium özellik - sadece kaydet)
       if (isPremium && editCerceve !== CerceveTipi.Normal) {
@@ -568,7 +568,7 @@ export const DogProfilePage: React.FC<DogProfilePageProps> = ({ kopekId }) => {
                     showColorPicker={true}
                     customColors={editRenkler}
                     onColorChange={setEditRenkler}
-                    aksesuarlar={editAksesuarlar}
+                    aksesuarlar={[...editAksesuarlar, ...(previewAksesuar ? [previewAksesuar.id] : [])]}
                   />
                 </Suspense>
               </div>
@@ -576,7 +576,37 @@ export const DogProfilePage: React.FC<DogProfilePageProps> = ({ kopekId }) => {
 
             {/* Aksesuarlar */}
             <div className="rounded-2xl p-4" style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-light)' }}>
-              <AccessorySelector seciliAksesuarlar={editAksesuarlar} onChange={setEditAksesuarlar} isPremium={isPremium} onPremiumUpsell={() => setShowPremiumModal(true)} />
+              <AccessorySelector
+                seciliAksesuarlar={editAksesuarlar}
+                onChange={setEditAksesuarlar}
+                isPremium={isPremium}
+                onPremiumUpsell={() => setShowPremiumModal(true)}
+                onPreviewRequest={(item) => { setPreviewAksesuar(item); setShowSatinAlModal(false); }}
+              />
+              {/* Aksesuar önizleme banner */}
+              {previewAksesuar && (
+                <div className="mt-3 rounded-xl p-3 flex items-center gap-3"
+                  style={{ background: 'rgba(99,102,241,0.08)', border: '1.5px solid rgba(99,102,241,0.25)' }}>
+                  <span style={{ fontSize: 22 }}>{previewAksesuar.emoji}</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: '#4f46e5', margin: 0 }}>Önizleme: {previewAksesuar.label}</p>
+                    <p style={{ fontSize: 11, color: '#6366f1', margin: 0 }}>Yukarıdaki 3D modelde görüntüleniyor</p>
+                  </div>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: '#4f46e5' }}>{previewAksesuar.fiyat}</span>
+                  <button type="button"
+                    onClick={() => setPreviewAksesuar(null)}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-semibold"
+                    style={{ background: '#f1f5f9', color: '#666', border: '1px solid #e2e8f0' }}>
+                    İptal
+                  </button>
+                  <button type="button"
+                    onClick={() => setShowSatinAlModal(true)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
+                    style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
+                    Satın Al
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Çerçeve */}
@@ -643,11 +673,6 @@ export const DogProfilePage: React.FC<DogProfilePageProps> = ({ kopekId }) => {
         <div className="flex items-center gap-2 mt-3">
           {!editMode && (
             <>
-              <button type="button" onClick={() => setShowAIModal(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl smooth-transition"
-                style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-light)', color: 'var(--color-text-muted)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                <Bot size={14} /><span>AI</span>
-              </button>
               <button type="button" onClick={() => setShowShareModal(true)}
                 className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-xl smooth-transition"
                 style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-light)', color: 'var(--color-text-muted)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
@@ -817,14 +842,14 @@ export const DogProfilePage: React.FC<DogProfilePageProps> = ({ kopekId }) => {
         <SocialShareCard kopek={kopek} onClose={() => setShowShareModal(false)} />
       )}
 
-      {/* AI Assistant Modal */}
-      {showAIModal && kopek && (
-        <AIAssistantModal
-          dogName={kopek.ad}
-          dogBreed={kopek.irk}
-          onClose={() => setShowAIModal(false)}
+      {/* Aksesuar Satın Al Modal */}
+      {showSatinAlModal && previewAksesuar && (
+        <SatinAlModal
+          item={previewAksesuar}
+          onKapat={() => { setShowSatinAlModal(false); setPreviewAksesuar(null); }}
         />
       )}
+
     </div>
   );
 };

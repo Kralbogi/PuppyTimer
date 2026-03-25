@@ -273,5 +273,16 @@ service cloud.firestore {
     match /asiKayitlari_mac/{userId}/kayitlar/{kayitId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+
+    // Hatırlatıcılar — kullanıcı kendi listesini yazar, Cloud Function okur
+    match /hatirlaticilar/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Hatırlatıcı gönderildi kaydı — Cloud Function yazar (admin SDK)
+    match /hatirlaticiGonderildi/{docId} {
+      allow read: if isAdmin();
+      allow write: if false; // Sadece Cloud Function yazar
+    }
   }
 }
