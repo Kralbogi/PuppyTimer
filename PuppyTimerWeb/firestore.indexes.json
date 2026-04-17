@@ -1,0 +1,175 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "kopekArkadaslar",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "aliciId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "durum",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "aktif",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "kopekArkadaslar",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "gonderenId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "durum",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "aktif",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "kopekArkadaslar",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "aliciId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "durum",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "aktif",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "olusturmaTarihi",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "kopekArkadaslar",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "gonderenId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "aliciId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "kopekId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "aktif",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "kopekArkadaslar",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "gonderenId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "aliciId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "kopekId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "durum",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "aktif",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "sikayetler",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "sikayetEdenId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "sikayetEdilenKopekId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "kategori",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "aktif",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "mesajKonusmalari",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "katilimcilar",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "sonMesajTarihi",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "urunler",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "aktif",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "olusturmaTarihi",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "toplulukMesajlari",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "aktif",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "olusturmaTarihi",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

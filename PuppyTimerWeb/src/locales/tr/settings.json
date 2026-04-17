@@ -1,0 +1,14 @@
+{
+  "title": "Ayarlar",
+  "language": {
+    "title": "Dil ve Bölge",
+    "description": "Uygulama dilini değiştirin",
+    "label": "Dil Seçin",
+    "changed": "Dil değiştirildi"
+  },
+  "account": {
+    "title": "Hesap",
+    "logout": "Çıkış Yap",
+    "logoutConfirm": "Çıkış yapmak istediğinizden emin misiniz?"
+  }
+}

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- ─── Export Method ─── -->
+	<!-- "app-store" = App Store Connect / TestFlight -->
+	<!-- "enterprise" = in-house distribution -->
+	<!-- "ad-hoc" = testing on registered devices -->
+	<key>method</key>
+	<string>app-store</string>
+
+	<!-- ─── Team ID ─── -->
+	<!-- Bulduğunuz Team ID'yi buraya yapıştırın -->
+	<key>teamID</key>
+	<string>REPLACE_WITH_YOUR_TEAM_ID</string>
+
+	<!-- ─── Bundle ID ─── -->
+	<key>bundleID</key>
+	<string>com.pawland.app</string>
+
+	<!-- ─── Signing Style ─── -->
+	<!-- "automatic" = Xcode otomatik provizyon profili yönetir -->
+	<key>signingStyle</key>
+	<string>automatic</string>
+
+	<!-- ─── Symbol Processing ─── -->
+	<key>stripSwiftSymbols</key>
+	<true/>
+
+	<!-- ─── Bitcode ─── -->
+	<!-- iOS 15+ için gereksiz hale geldi -->
+	<key>uploadBitcode</key>
+	<false/>
+
+	<!-- ─── Distribution Thinning ─── -->
+	<!-- "thin" = device-specific (smaller download) -->
+	<key>thinning</key>
+	<string>&lt;none&gt;</string>
+
+</dict>
+</plist>

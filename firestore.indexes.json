@@ -1,0 +1,109 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "toplulukMesajlari",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "aktif", "order": "ASCENDING" },
+        { "fieldPath": "tarih", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "haritaIsaretciler",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "aktif", "order": "ASCENDING" },
+        { "fieldPath": "guncellenmeTarihi", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "urunler",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "aktif", "order": "ASCENDING" },
+        { "fieldPath": "olusturmaTarihi", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "siparisler",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "kullaniciId", "order": "ASCENDING" },
+        { "fieldPath": "tarih", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "tuvalet_kaydi",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "tarih", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "saglik_notlari",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "kopekId", "order": "ASCENDING" },
+        { "fieldPath": "tarih", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "konusma",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "threadId", "order": "ASCENDING" },
+        { "fieldPath": "zaman", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "messages",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "conversationId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "beslenmeProgramlari",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "kopekId", "order": "ASCENDING" },
+        { "fieldPath": "aktif", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "suProgramlari",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "kopekId", "order": "ASCENDING" },
+        { "fieldPath": "aktif", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "yuruyusProgramlari",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "kopekId", "order": "ASCENDING" },
+        { "fieldPath": "aktif", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "asiTakibi",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "kopekId", "order": "ASCENDING" },
+        { "fieldPath": "tarih", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "topluluk_kopekler",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "aktif", "order": "ASCENDING" },
+        { "fieldPath": "olusturmaTarihi", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

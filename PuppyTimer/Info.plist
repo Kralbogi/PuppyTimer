@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- ─── Bundle Info ─── -->
+	<key>CFBundleDevelopmentRegion</key>
+	<string>tr_TR</string>
+	<key>CFBundleDisplayName</key>
+	<string>PuppyTimer</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.pawland.app</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>PuppyTimer</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+
+	<!-- ─── iOS Version Info ─── -->
+	<key>MinimumOSVersion</key>
+	<string>15.0</string>
+
+	<!-- ─── Localization ─── -->
+	<key>CFBundleSupportedPlatforms</key>
+	<array>
+		<string>iPhoneOS</string>
+	</array>
+
+	<!-- ─── App Permissions / Usage Descriptions ─── -->
+	<!-- Local Notifications (Required) -->
+	<key>UIUserNotificationTypes</key>
+	<integer>7</integer>
+	<key>UIApplicationEnableLocalNotifications</key>
+	<true/>
+
+	<!-- Notifications Usage Description -->
+	<key>NSUserNotificationUsageDescription</key>
+	<string>Köpeğinizin mama, su, yürüyüş ve tıbbi hatırlatmalarını almak için bildirimleri etkinleştirin.</string>
+
+	<!-- Location Permission (Community Map feature) -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Köpeğinizin konumunu topluluk haritasında paylaşabilmek için.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Köpeğinizin konumunu topluluk haritasında paylaşabilmek için.</string>
+
+	<!-- Photo Library Permission -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Köpeğinizin fotoğrafını profil resmi veya tuvalet analizi olarak yükleyebilmek için.</key>
+
+	<!-- ─── App Behavior ─── -->
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>AccentColor</string>
+	</dict>
+
+	<!-- Launch Screen Storyboard (if using LaunchScreen.storyboard) -->
+	<!-- <key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string> -->
+
+	<!-- ─── Device Orientation ─── -->
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
+	<!-- Landscape support only on iPad (if needed) -->
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
+	<!-- ─── App Capabilities & Features ─── -->
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<!-- Not strictly required, but good to declare -->
+	</array>
+
+	<!-- Network Configuration (for HTTP requests if needed) -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Allow insecure connections to localhost for testing only -->
+		<key>NSLocalNetworkUsageDescription</key>
+		<string>Yerel ağ erişimi gereklidir.</string>
+		<key>NSBonjourServices</key>
+		<array>
+			<string>_http._tcp</string>
+			<string>_https._tcp</string>
+		</array>
+	</dict>
+
+	<!-- ─── Keychain Sharing (for AnahtarlikServisi) ─── -->
+	<!-- This is set via Entitlements file, not Info.plist -->
+
+</dict>
+</plist>

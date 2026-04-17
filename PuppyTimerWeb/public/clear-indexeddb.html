@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IndexedDB Temizle</title>
+  <style>
+    body {
+      font-family: system-ui;
+      padding: 40px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    button {
+      background: #f97316;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover { background: #ea580c; }
+    .success { color: #22c55e; margin-top: 16px; }
+    .info { background: #fef3c7; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  </style>
+</head>
+<body>
+  <h1>IndexedDB Temizleme</h1>
+  <div class="info">
+    <strong>Uyarı:</strong> Bu işlem tüm yerel verileri silecek. 
+    Firestore'da yedekli veriler korunacak.
+  </div>
+  <button onclick="clearDB()">IndexedDB'yi Temizle</button>
+  <div id="result"></div>
+
+  <script>
+    async function clearDB() {
+      try {
+        // PawLandDB'yi sil
+        await indexedDB.deleteDatabase('PawLandDB');
+        document.getElementById('result').innerHTML = 
+          '<div class="success">✅ IndexedDB temizlendi! Sayfayı yenileyin.</div>';
+        setTimeout(() => window.location.href = '/', 2000);
+      } catch (err) {
+        document.getElementById('result').innerHTML = 
+          '<div style="color: red">❌ Hata: ' + err.message + '</div>';
+      }
+    }
+  </script>
+</body>
+</html>

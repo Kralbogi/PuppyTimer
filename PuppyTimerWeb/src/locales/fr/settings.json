@@ -1,0 +1,14 @@
+{
+  "title": "Settings",
+  "language": {
+    "title": "Language & Region",
+    "description": "Change app language",
+    "label": "Select Language",
+    "changed": "Language changed"
+  },
+  "account": {
+    "title": "Account",
+    "logout": "Sign Out",
+    "logoutConfirm": "Are you sure you want to sign out?"
+  }
+}

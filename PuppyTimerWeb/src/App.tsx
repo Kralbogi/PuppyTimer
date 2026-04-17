@@ -1,0 +1,391 @@
+import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from './db/database'
+import BottomTabBar from './components/layout/BottomTabBar'
+import DogDropdown from './components/layout/DogDropdown'
+import { SepetProvider } from './contexts/SepetContext'
+import { KonumProvider } from './contexts/KonumContext'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
+
+// Lazy-loaded pages — her sayfa ayrı bir chunk'a bölünür
+// Bu sayede başlangıç bundle'ı küçülür, üç.js ve leaflet sadece ilgili sayfada yüklenir
+const OnboardingPage    = lazy(() => import('./pages/OnboardingPage').then(m => ({ default: m.OnboardingPage })))
+const DogProfilePage    = lazy(() => import('./pages/DogProfilePage').then(m => ({ default: m.DogProfilePage })))
+const TimersPage        = lazy(() => import('./pages/TimersPage').then(m => ({ default: m.TimersPage })))
+const WalksPage         = lazy(() => import('./pages/WalksPage').then(m => ({ default: m.WalksPage })))
+const ToiletPage        = lazy(() => import('./pages/ToiletPage').then(m => ({ default: m.ToiletPage })))
+const HealthPage        = lazy(() => import('./pages/HealthPage').then(m => ({ default: m.HealthPage })))
+const MapPage           = lazy(() => import('./pages/MapPage').then(m => ({ default: m.MapPage })))
+const BakimTakvimiPage  = lazy(() => import('./pages/BakimTakvimiPage').then(m => ({ default: m.BakimTakvimiPage })))
+const EgitimTrackerPage = lazy(() => import('./pages/EgitimTrackerPage').then(m => ({ default: m.EgitimTrackerPage })))
+const BasarilarPage     = lazy(() => import('./pages/BasarilarPage').then(m => ({ default: m.BasarilarPage })))
+const TakvimPage        = lazy(() => import('./pages/TakvimPage').then(m => ({ default: m.TakvimPage })))
+const MenuPage          = lazy(() => import('./pages/MenuPage').then(m => ({ default: m.MenuPage })))
+const PhotoGalleryPage  = lazy(() => import('./pages/PhotoGalleryPage').then(m => ({ default: m.PhotoGalleryPage })))
+const StatsPage         = lazy(() => import('./pages/StatsPage').then(m => ({ default: m.StatsPage })))
+const ShopPage          = lazy(() => import('./pages/ShopPage').then(m => ({ default: m.ShopPage })))
+const UrunDetayPage     = lazy(() => import('./pages/UrunDetayPage'))
+const LoginPage         = lazy(() => import('./pages/LoginPage'))
+const RegisterPage      = lazy(() => import('./pages/RegisterPage'))
+const SettingsPage      = lazy(() => import('./pages/SettingsPage'))
+const ArkadaslarimPage  = lazy(() => import('./pages/ArkadaslarimPage').then(m => ({ default: m.ArkadaslarimPage })))
+const AdminPage         = lazy(() => import('./pages/AdminPage'))
+const SiparisGecmisiPage = lazy(() => import('./pages/SiparisGecmisiPage'))
+const GiderTakibiPage   = lazy(() => import('./pages/GiderTakibiPage').then(m => ({ default: m.GiderTakibiPage })))
+const HatirlaticiPage   = lazy(() => import('./pages/HatirlaticiPage').then(m => ({ default: m.HatirlaticiPage })))
+const RandevuPage       = lazy(() => import('./pages/RandevuPage').then(m => ({ default: m.RandevuPage })))
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'))
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage'))
+const NotFoundPage      = lazy(() => import('./pages/NotFoundPage'))
+import { X as XIcon, Bell, Map, User as UserIcon } from 'lucide-react'
+import { authDinle } from './services/authService'
+import { alarmKontrolEt } from './services/hatirlaticiService'
+import type { Hatirlatici } from './types/models'
+import type { User } from 'firebase/auth'
+
+import { kopekleriFirestoreDanYukle, firestoreDegisiklikleriniDinle } from './services/kopekSenkronizasyon'
+import { subscribeToPremiumStatus } from './services/premiumService'
+import { initializeStorageMonitoring } from './db/database'
+import Balloons from './components/common/Balloons'
+import { bugunDogumGunuMu } from './services/dateUtils'
+import { getLastSelectedDog, saveLastSelectedDog } from './services/dogSelectionService'
+
+// Sayfa yüklenirken gösterilen minimal loading göstergesi
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-40">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 rounded-full border-4 animate-spin soft-shadow" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-primary)' }} />
+        <div className="text-xs font-medium text-center" style={{ color: 'var(--color-text-muted)' }}>Yükleniyor...</div>
+      </div>
+    </div>
+  )
+}
+
+function DogLayout() {
+  const { id } = useParams()
+  const kopekId = Number(id)
+  const navigate = useNavigate()
+  const location = useLocation()
+  const isMapPage = location.pathname.endsWith('/map')
+  const kopekler = useLiveQuery(() => db.kopekler.orderBy('ad').toArray()) ?? []
+
+  const [aktifAlarm, setAktifAlarm] = useState<Hatirlatici | null>(null)
+
+  const handleSelectDog = (dogId: number) => {
+    saveLastSelectedDog(dogId);
+    navigate(`/dog/${dogId}/map`);
+  };
+
+  // Her 30 saniyede hatırlatıcı alarmlarını kontrol et
+  useEffect(() => {
+    if (!kopekId) return
+    const TUR_EMOJI: Record<string, string> = {
+      beslenme: "🍖", yuruyus: "🦮", ilac: "💊", asi: "💉",
+      bakim: "✂️", veteriner: "🏥", diger: "🔔",
+    }
+    const kontrol = () => {
+      const alarm = alarmKontrolEt(kopekId)
+      if (alarm) {
+        setAktifAlarm(alarm)
+        // Browser notification (tab kapalı ama tarayıcı açıkken de çalışır)
+        if (Notification.permission === 'granted') {
+          const emoji = TUR_EMOJI[alarm.tur] ?? '🔔'
+          navigator.serviceWorker.ready.then(reg => {
+            reg.showNotification(`${emoji} ${alarm.baslik}`, {
+              body: 'PawLand hatırlatıcısı',
+              icon: '/icons/icon-192.png',
+              badge: '/icons/icon-192.png',
+              vibrate: [100, 50, 100],
+            } as NotificationOptions)
+          }).catch(() => {
+            new Notification(`${emoji} ${alarm.baslik}`, { body: 'PawLand hatırlatıcısı' })
+          })
+        }
+      }
+    }
+    kontrol()
+    const interval = setInterval(kontrol, 30_000)
+    return () => clearInterval(interval)
+  }, [kopekId])
+
+  // kopekler yüklendikten sonra geçersiz kopek ID'sini yönlendir
+  const kopekMevcut = kopekler.some(k => k.id === kopekId)
+  if (!kopekMevcut && kopekler.length > 0) {
+    return <Navigate to={`/dog/${kopekler[0].id}/map`} replace />
+  }
+
+  return (
+    <div className="flex flex-col h-[100dvh] bg-floating-orbs" style={{ background: 'var(--color-bg)' }}>
+      {/* Hatırlatıcı Alarm Banner */}
+      {aktifAlarm && (
+        <div className="relative z-[1200] text-white px-4 py-3 flex items-center gap-3 shadow-lg" style={{ background: 'var(--color-primary)' }}>
+          <Bell size={18} className="flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-sm leading-tight">Hatırlatıcı!</p>
+            <p className="text-xs opacity-80 truncate">{aktifAlarm.baslik}</p>
+          </div>
+          <button
+            onClick={() => setAktifAlarm(null)}
+            className="p-1 hover:bg-white/20 rounded-full flex-shrink-0"
+          >
+            <XIcon size={18} />
+          </button>
+        </div>
+      )}
+      <div className="relative z-[1100] flex items-center gap-2 px-4 pt-3 pb-2 border-b" style={{ background: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}>
+        <DogDropdown
+          dogs={kopekler}
+          selectedId={kopekId}
+          onSelect={handleSelectDog}
+          onAdd={() => navigate('/onboarding')}
+        />
+        <button
+          type="button"
+          onClick={() => navigate(`/dog/${kopekId}/map`)}
+          className="p-2 rounded-xl transition-colors"
+          style={{
+            background: isMapPage ? 'var(--color-primary)' : 'transparent',
+            color: isMapPage ? 'white' : 'var(--color-text-muted)',
+          }}
+        >
+          <Map size={20} />
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(`/dog/${kopekId}`)}
+          className="p-2 rounded-xl transition-colors"
+          style={{
+            background: location.pathname === `/dog/${kopekId}` ? 'var(--color-primary)' : 'transparent',
+            color: location.pathname === `/dog/${kopekId}` ? 'white' : 'var(--color-text-muted)',
+          }}
+        >
+          <UserIcon size={20} />
+        </button>
+      </div>
+
+      <div className={isMapPage ? "flex-1 overflow-hidden" : "flex-1 overflow-y-auto pb-20"}>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route index element={<DogProfilePage kopekId={kopekId} />} />
+            <Route path="shop" element={<ShopPage />} />
+            <Route path="shop/urun/:urunId" element={<UrunDetayPage />} />
+            <Route path="menu" element={<MenuPage />} />
+            <Route path="timers" element={<TimersPage kopekId={kopekId} />} />
+            <Route path="walks" element={<WalksPage kopekId={kopekId} />} />
+            <Route path="toilet" element={<ToiletPage kopekId={kopekId} />} />
+            <Route path="health" element={<HealthPage kopekId={kopekId} />} />
+            <Route path="grooming" element={<BakimTakvimiPage />} />
+            <Route path="training" element={<EgitimTrackerPage />} />
+            <Route path="map" element={<MapPage kopekId={kopekId} />} />
+            <Route path="calendar" element={<TakvimPage kopekId={kopekId} />} />
+            <Route path="gallery" element={<PhotoGalleryPage kopekId={kopekId} />} />
+            <Route path="stats" element={<StatsPage kopekId={kopekId} />} />
+            <Route path="achievements" element={<BasarilarPage />} />
+            <Route path="expenses" element={<GiderTakibiPage />} />
+            <Route path="reminders" element={<HatirlaticiPage />} />
+            <Route path="appointments" element={<RandevuPage />} />
+          </Routes>
+        </Suspense>
+      </div>
+      <BottomTabBar />
+    </div>
+  )
+}
+
+export default function App() {
+  const kopekler = useLiveQuery(() => db.kopekler.toArray())
+  const [ready, setReady] = useState(false)
+  const [user, setUser] = useState<User | null | undefined>(undefined)
+  const [dogsLoaded, setDogsLoaded] = useState(false)
+  const [showBirthdayBalloons, setShowBirthdayBalloons] = useState(false)
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false)
+  const [yuklenenKopekler, setYuklenenKopekler] = useState<any[] | null>(null)
+  // Track last seen user UID to prevent white screen on Firebase re-auth
+  const prevUserUidRef = useRef<string | null>(null)
+  // Track last synced user UID to prevent duplicate Firestore syncs on re-auth
+  const syncedUserUidRef = useRef<string | null>(null)
+
+  // Auth durumunu dinle
+  useEffect(() => {
+    const unsubscribe = authDinle((kullanici) => {
+      if (kullanici) {
+        // Aynı kullanıcı yeniden doğrulandıysa (token yenileme) ekranı sıfırlama
+        if (kullanici.uid !== prevUserUidRef.current) {
+          setReady(false)
+        }
+        prevUserUidRef.current = kullanici.uid
+      } else {
+        prevUserUidRef.current = null
+        syncedUserUidRef.current = null
+        setDogsLoaded(false)
+        setYuklenenKopekler(null)
+        setInitialLoadComplete(false)
+      }
+      setUser(kullanici)
+    })
+    return unsubscribe
+  }, [])
+
+  // Kullanici giris yaptiysa, Firestore'dan kopekleri yukle
+  useEffect(() => {
+    if (!user) return
+    // Aynı kullanıcı için zaten senkronize edildi, tekrar çalıştırma
+    if (syncedUserUidRef.current === user.uid) return
+    syncedUserUidRef.current = user.uid
+
+    let unsubscribe: (() => void) | undefined
+
+    const yukleVeDinle = async () => {
+      try {
+        // Firestore'dan kopekleri yukle
+        await kopekleriFirestoreDanYukle()
+
+        // IndexedDB'den direkt okuyarak kopek sayisini kontrol et
+        // (useLiveQuery'e güvenmek yerine)
+        const mevcutKopekler = await db.kopekler.toArray()
+
+        // Yüklenen köpekleri state'e kaydet (routing kararı için)
+        setYuklenenKopekler(mevcutKopekler)
+
+        // Daha uzun gecikme - IndexedDB'nin browser'da tamamen güncellendiginden emin ol
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        // Şimdi dogsLoaded'ı set et (bu ready check'i tetikleyecek)
+        setDogsLoaded(true)
+
+        // Herhangi bir kopegin dogum gunu bugunku tarihse balonlari goster
+        const dogs = await db.kopekler.toArray()
+        const birisiDogumGunuMu = dogs.some(k => bugunDogumGunuMu(k.dogumTarihi))
+        if (birisiDogumGunuMu) {
+          setShowBirthdayBalloons(true)
+        }
+
+        // Firestore degisikliklerini dinle
+        unsubscribe = firestoreDegisiklikleriniDinle()
+
+        // İlk yükleme tamamlandı
+        setInitialLoadComplete(true)
+      } catch (error) {
+        console.error('Kopekler yuklenemedi:', error)
+        // Hata olsa bile devam et (offline mod)
+        setDogsLoaded(true)
+        setInitialLoadComplete(true)
+      }
+    }
+
+    yukleVeDinle()
+
+    return () => {
+      if (unsubscribe) unsubscribe()
+    }
+  }, [user])
+
+  // Setup premium status listener & storage monitoring when user logs in
+  useEffect(() => {
+    if (!user) return
+
+    // Subscribe to real-time premium status changes
+    const unsubscribePremium = subscribeToPremiumStatus((_isPremium) => {
+      // Premium status değişince premium-gated content otomatik güncellenir
+    })
+
+    // Initialize storage monitoring (auto-cleanup when quota approaches limit)
+    initializeStorageMonitoring()
+
+    return () => {
+      unsubscribePremium()
+    }
+  }, [user])
+
+  useEffect(() => {
+    // Kullanıcı giriş yapmamışsa hemen hazır
+    if (user === null && kopekler !== undefined) {
+      setReady(true)
+      return
+    }
+
+    // Kullanıcı giriş yapmışsa, Firestore sync tamamlanana kadar bekle
+    if (user && kopekler !== undefined && dogsLoaded && initialLoadComplete) {
+      setReady(true)
+    }
+  }, [kopekler, user, dogsLoaded, initialLoadComplete])
+
+  if (!ready) {
+    return (
+      <div className="flex items-center justify-center h-[100dvh] bg-floating-orbs relative overflow-hidden" style={{ background: 'var(--color-bg)' }}>
+        <div className="text-center relative z-10">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-full border-4 animate-spin soft-shadow" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-primary)' }} />
+          <div className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>Yükleniyor...</div>
+        </div>
+      </div>
+    )
+  }
+
+  // Giris yapilmamissa login/register sayfalarini goster
+  if (!user) {
+    return (
+      <SepetProvider>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </Suspense>
+      </SepetProvider>
+    )
+  }
+
+  // Giris yapilmissa ana uygulama
+  // Routing kararı için yuklenenKopekler kullan (useLiveQuery değil)
+  const routingKopekleri = yuklenenKopekler ?? kopekler
+
+  // Son seçilen köpeği localStorage'dan al, yoksa ilk köpeği kullan
+  const getDefaultDogId = () => {
+    if (!routingKopekleri || routingKopekleri.length === 0) return null;
+
+    const lastSelected = getLastSelectedDog();
+    const lastSelectedExists = routingKopekleri.some(k => k.id === lastSelected);
+
+    if (lastSelected && lastSelectedExists) {
+      return lastSelected;
+    }
+
+    return routingKopekleri[0].id;
+  };
+
+  return (
+    <KonumProvider>
+    <SepetProvider>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/arkadaslarim" element={<ArkadaslarimPage />} />
+          <Route path="/siparisler" element={<SiparisGecmisiPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+          <Route path="/dog/:id/*" element={<DogLayout />} />
+          <Route
+            path="*"
+            element={
+              routingKopekleri && routingKopekleri.length > 0
+                ? <Navigate to={`/dog/${getDefaultDogId()}/map`} replace />
+                : routingKopekleri !== null
+                  ? <Navigate to="/onboarding" replace />
+                  : <NotFoundPage />
+            }
+          />
+        </Routes>
+      </Suspense>
+      {showBirthdayBalloons && (
+        <Balloons onComplete={() => setShowBirthdayBalloons(false)} />
+      )}
+    </SepetProvider>
+    </KonumProvider>
+  )
+}

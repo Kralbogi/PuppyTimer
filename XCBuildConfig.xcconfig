@@ -1,0 +1,33 @@
+// iOS Build Configuration for PuppyTimer
+// These settings work with Swift Package Manager's auto-generated Xcode project
+
+// Bundle Identifier
+PRODUCT_BUNDLE_IDENTIFIER = com.pawland.app
+
+// Minimum iOS Version (iOS 15.0+)
+IPHONEOS_DEPLOYMENT_TARGET = 15.0
+
+// macOS minimum version (for multi-platform support)
+MACOSX_DEPLOYMENT_TARGET = 14.0
+
+// Code Signing Style (Automatic = Xcode manages signing)
+CODE_SIGN_STYLE = Automatic
+
+// Enable Bitcode (disabled for iOS 15+)
+ENABLE_BITCODE = NO
+
+// Swift Language Version
+SWIFT_VERSION = 5.9
+
+// Skip Code Signing for Simulator Builds
+CODE_SIGN_IDENTITY[sdk=iphonesimulator*] = -
+
+// Generate Debug Symbols
+DEBUG_INFORMATION_FORMAT = dwarf
+
+// Optimization Level
+SWIFT_OPTIMIZATION_LEVEL[config=Debug] = -Onone
+SWIFT_OPTIMIZATION_LEVEL[config=Release] = -Owholemodule
+
+// Disable strict concurrency checking (Swift 6 compatibility)
+SWIFT_STRICT_CONCURRENCY = minimal
