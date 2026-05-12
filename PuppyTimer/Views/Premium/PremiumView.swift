@@ -1,6 +1,6 @@
 // =============================================================================
 // PawLand macOS — PremiumView
-// Premium özellikleri göster, satın alma akışını web'e yönlendir
+// Premium özellikleri göster, satın alma akışını IAP entegrasyonuna hazırlar
 // =============================================================================
 
 import SwiftUI
@@ -127,13 +127,11 @@ struct PremiumView: View {
                 } else {
                     VStack(spacing: 12) {
                         Button {
-                            if let url = URL(string: "https://pawland3448.web.app/premium") {
-                                NSWorkspace.shared.open(url)
-                            }
+                            // Apple IAP entegrasyonu tamamlandığında satın alma akışı burada başlatılacak.
                         } label: {
                             HStack {
                                 Image(systemName: "crown.fill")
-                                Text("Premium'a Geç")
+                                Text("Uygulama İçi Satın Alma (Yakında)")
                                     .fontWeight(.bold)
                             }
                             .frame(maxWidth: .infinity)
@@ -142,8 +140,9 @@ struct PremiumView: View {
                         .buttonStyle(.borderedProminent)
                         .tint(.orange)
                         .controlSize(.large)
+                        .disabled(true)
 
-                        Text("Satın alma web tarayıcısında gerçekleşir.\nSatın aldıktan sonra uygulamayı yenilemeniz yeterlidir.")
+                        Text("Apple App Store politikalarına uygun olarak premium satın alma, uygulama içi ödeme (IAP) ile sunulacaktır.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)

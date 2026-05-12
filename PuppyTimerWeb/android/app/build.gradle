@@ -1,5 +1,10 @@
 apply plugin: 'com.android.application'
 
+def releaseStoreFilePath = System.getenv("PAWLAND_KEYSTORE_PATH") ?: "../pawland-release.keystore"
+def releaseStorePassword = System.getenv("PAWLAND_STORE_PASSWORD") ?: ""
+def releaseKeyAlias = System.getenv("PAWLAND_KEY_ALIAS") ?: "pawland"
+def releaseKeyPassword = System.getenv("PAWLAND_KEY_PASSWORD") ?: ""
+
 android {
     namespace = "com.neolitik.pawland"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -18,10 +23,10 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('../pawland-release.keystore')
-            storePassword 'pawland2024'
-            keyAlias 'pawland'
-            keyPassword 'pawland2024'
+            storeFile file(releaseStoreFilePath)
+            storePassword releaseStorePassword
+            keyAlias releaseKeyAlias
+            keyPassword releaseKeyPassword
         }
     }
     buildTypes {
