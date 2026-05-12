@@ -140,8 +140,8 @@ service cloud.firestore {
     // Kullanıcı cezaları - herkes okuyabilir (ceza durumunu kontrol için)
     match /kullaniciCezalar/{userId} {
       allow read: if request.auth != null;
-      // Admin manuel ban uygulayabilir; mevcut otomatik ceza sistemi de çalışır
-      allow write: if isAdmin() || request.auth != null;
+      // Ceza kayıtları sadece admin/arka plan servisleri tarafından güncellenir
+      allow write: if isAdmin();
     }
 
     // Eşsiz rümuz kaydı - herkes okuyabilir (uniqueness check için),
@@ -221,28 +221,6 @@ service cloud.firestore {
     match /premiumKullanicilar/{userId} {
       allow read: if request.auth != null;
       allow create, update, delete: if isAdmin();
-    }
-
-    // FCM tokenları - kullanıcı sadece kendi tokenını yazar/okur
-    match /fcmTokenlari/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      allow delete: if isAdmin();
-    }
-
-    // Push bildirimleri - sadece admin gönderir
-    match /pushBildirimleri/{docId} {
-      allow read: if isAdmin();
-      allow create: if isAdmin();
-      allow update: if isAdmin();
-    }
-
-    // Sipariş kayıtları - kullanıcı kendi siparişini okur, yazar
-    match /siparisler/{docId} {
-      allow read: if request.auth != null &&
-                    (resource.data.kullaniciId == request.auth.uid || isAdmin());
-      allow create: if request.auth != null &&
-                     request.resource.data.kullaniciId == request.auth.uid;
-      allow update: if isAdmin();
     }
 
     // Arkadaşlık sistemi - ilgili kullanıcılar okur/yazar

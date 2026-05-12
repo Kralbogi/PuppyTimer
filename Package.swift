@@ -4,6 +4,7 @@ import PackageDescription
 let package = Package(
     name: "PuppyTimer",
     platforms: [
+        .iOS(.v17),        // SwiftData tabanli iOS hedefi
         .macOS(.v14)       // macOS 14+
     ],
     dependencies: [

@@ -60,6 +60,7 @@ final class ZamanlayiciServisi {
     }
 
     private func uyanisBildiriminiDinle() {
+        #if os(macOS)
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification,
             object: nil,
@@ -67,6 +68,15 @@ final class ZamanlayiciServisi {
         ) { [weak self] _ in
             self?.guncelle()
         }
+        #else
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.guncelle()
+        }
+        #endif
     }
 
     static func kalanSureMetni(_ saniye: TimeInterval) -> String {

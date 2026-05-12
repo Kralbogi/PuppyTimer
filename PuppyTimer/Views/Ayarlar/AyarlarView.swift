@@ -55,16 +55,14 @@ struct AyarlarView: View {
                         .foregroundStyle(.secondary)
 
                         Button {
-                            // Web uygulamasında Premium satın alma sayfasına yönlendir
-                            if let url = URL(string: "https://pawland3448.web.app/premium") {
-                                NSWorkspace.shared.open(url)
-                            }
+                            // Apple IAP entegrasyonu tamamlandığında satın alma akışı burada başlatılacak.
                         } label: {
-                            Label("Premium'a Geç", systemImage: "crown.fill")
+                            Label("Uygulama İçi Satın Alma (Yakında)", systemImage: "crown.fill")
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(.orange)
+                        .disabled(true)
                     }
                 }
             }
@@ -108,6 +106,16 @@ struct AyarlarView: View {
                 }
             }
 
+            // ── Yasal ───────────────────────────────────────────────────────────
+            Section("Yasal") {
+                Link(destination: URL(string: "https://pawland3448.web.app/privacy-policy")!) {
+                    Label("Gizlilik Politikası", systemImage: "hand.raised")
+                }
+                Link(destination: URL(string: "https://pawland3448.web.app/terms-of-service")!) {
+                    Label("Kullanım Koşulları", systemImage: "doc.text")
+                }
+            }
+
             // ── Hakkında ─────────────────────────────────────────────────────
             Section("Hakkında") {
                 VStack(alignment: .leading, spacing: 8) {
@@ -116,7 +124,7 @@ struct AyarlarView: View {
                     Text("Köpek bakım ve sağlık takip uygulaması")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text("v2.0 — macOS 14+")
+                    Text("v1.0.0 — macOS 14+")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                 }

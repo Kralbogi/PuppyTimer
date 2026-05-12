@@ -49,7 +49,7 @@
 
 	<!-- Photo Library Permission -->
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Köpeğinizin fotoğrafını profil resmi veya tuvalet analizi olarak yükleyebilmek için.</key>
+	<string>Köpeğinizin fotoğrafını profil resmi veya tuvalet analizi olarak yükleyebilmek için.</string>
 
 	<!-- ─── App Behavior ─── -->
 	<key>UILaunchScreen</key>
@@ -89,15 +89,22 @@
 	<!-- Network Configuration (for HTTP requests if needed) -->
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<!-- Allow insecure connections to localhost for testing only -->
-		<key>NSLocalNetworkUsageDescription</key>
-		<string>Yerel ağ erişimi gereklidir.</string>
-		<key>NSBonjourServices</key>
-		<array>
-			<string>_http._tcp</string>
-			<string>_https._tcp</string>
-		</array>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
 	</dict>
+
+	<!-- Local network discovery (if needed by local integrations) -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Yerel ağ erişimi gereklidir.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_http._tcp</string>
+		<string>_https._tcp</string>
+	</array>
+
+	<!-- App Store Connect encryption export compliance -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 
 	<!-- ─── Keychain Sharing (for AnahtarlikServisi) ─── -->
 	<!-- This is set via Entitlements file, not Info.plist -->
